@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class EndpointHitCreate {
     @NotBlank(message = "must not be blank")
-    @Size(max = 50, message = "max size is 50")
+    @Size(max = 100, message = "max size is 100")
     private String app;
     @NotBlank(message = "must not be blank")
     @Size(max = 100, message = "max size is 100")
