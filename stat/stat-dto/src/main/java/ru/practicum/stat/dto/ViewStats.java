@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 
 @Data
 @RequiredArgsConstructor
-@NoArgsConstructor
 public class ViewStats {
     private String app;
     private String uri;
