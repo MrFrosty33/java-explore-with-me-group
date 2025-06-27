@@ -20,7 +20,7 @@ import java.util.List;
 @RestController
 @Slf4j
 public class StatController {
-    private final StatService statService;
+    private final StatServiceImpl statService;
 
     @PostMapping("hit")
     public void createHit(@RequestBody EndpointHitCreate hitCreate) {
