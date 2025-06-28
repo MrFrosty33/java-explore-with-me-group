@@ -25,7 +25,7 @@ import java.util.List;
 @Slf4j
 @Validated
 public class StatController {
-    private final StatServiceImpl statService;
+    private final StatService statService;
 
     @PostMapping("/hit")
     public void createHit(@Valid @RequestBody EndpointHitCreate hitCreate) {
@@ -41,7 +41,7 @@ public class StatController {
                                     @RequestParam(required = false) List<String> uris,
                                     @RequestParam(defaultValue = "false") boolean unique) {
         log.info("Get stats: {}, {}, {}, {}", start, end, uris, unique);
-        if(end.isBefore(start)) {
+        if (end.isBefore(start)) {
             throw new StatValidationException("Start date  must be before end date");
         }
         return statService.getStats(start, end, uris, unique);

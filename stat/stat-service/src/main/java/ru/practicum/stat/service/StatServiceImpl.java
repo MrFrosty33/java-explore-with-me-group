@@ -11,7 +11,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class StatServiceImpl implements StatService {
-    private final StatRepositoryImpl statRepository;
+    private final StatRepository statRepository;
 
     @Override
     public void saveHit(EndpointHitCreate hitCreate) {
