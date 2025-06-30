@@ -1,6 +1,5 @@
 package ru.practicum.stat.client;
 
-import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import ru.practicum.stat.dto.EndpointHitCreate;
 import ru.practicum.stat.dto.ViewStats;
