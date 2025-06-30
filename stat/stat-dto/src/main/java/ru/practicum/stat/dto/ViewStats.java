@@ -1,7 +1,6 @@
 package ru.practicum.stat.dto;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 @Data
