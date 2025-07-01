@@ -26,7 +26,7 @@ public class StatRepositoryImpl implements StatRepository {
             WHERE created BETWEEN :start AND :end
             """;
 
-    private static final String SQL_GROUP_BY = " GROUP BY app, uri";
+    private static final String SQL_GROUP_BY = " GROUP BY app, uri ORDER BY hits DESC";
 
     @Override
     public void save(EndpointHitCreate hit) {
