@@ -1,6 +1,5 @@
 package ru.practicum.explore.with.me.controller;
 
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +30,6 @@ public class UserController {
 
     @GetMapping("/admin/users")
     public List<UserDto> find(@RequestParam
-                              @NotEmpty(message = "must not be null / empty")
                               List<Long> ids,
                               @RequestParam(defaultValue = "0")
                               @PositiveOrZero(message = "must be positive or zero")
