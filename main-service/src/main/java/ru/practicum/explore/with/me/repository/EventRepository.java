@@ -5,8 +5,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import ru.practicum.explore.with.me.model.User;
 import ru.practicum.explore.with.me.model.event.Event;
-import ru.practicum.explore.with.me.model.user.User;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("""
@@ -14,6 +14,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             WHERE e.initiator = :user
             ORDER BY e.createdOn
             """)
-    Page<Event> findEventsByUserWitOffsetAndLimit(@Param("user") User user,
+    Page<Event> findEventsByUser(@Param("user") User user,
                                                   Pageable pageable);
 }
