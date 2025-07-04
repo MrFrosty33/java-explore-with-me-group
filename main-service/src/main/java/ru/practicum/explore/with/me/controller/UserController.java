@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.explore.with.me.model.user.AdminFindUserParam;
 import ru.practicum.explore.with.me.model.user.NewUserRequest;
 import ru.practicum.explore.with.me.model.user.UserDto;
 import ru.practicum.explore.with.me.service.UserService;
@@ -50,7 +51,13 @@ public class UserController {
                               HttpServletRequest request) {
         saveStats(request);
         log.trace("UserController: find() call with ids: {}, from: {}, size: {}", ids, from, size);
-        return service.find(ids, from, size);
+
+        AdminFindUserParam param = AdminFindUserParam.builder()
+                .ids(ids)
+                .from(from)
+                .size(size)
+                .build();
+        return service.find(param);
     }
 
     @PostMapping("/admin/users")

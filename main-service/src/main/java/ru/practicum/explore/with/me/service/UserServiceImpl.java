@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explore.with.me.mapper.UserMapper;
+import ru.practicum.explore.with.me.model.user.AdminFindUserParam;
 import ru.practicum.explore.with.me.model.user.NewUserRequest;
 import ru.practicum.explore.with.me.model.user.User;
 import ru.practicum.explore.with.me.model.user.UserDto;
@@ -25,15 +26,15 @@ public class UserServiceImpl implements UserService, ExistenceValidator<User>, D
     private final UserMapper userMapper;
 
     @Override
-    public List<UserDto> find(List<Long> ids, int from, int size) {
+    public List<UserDto> find(AdminFindUserParam param) {
         List<UserDto> result;
 
-        if (ids != null && !ids.isEmpty()) {
-            result = userRepository.findByIdIn(ids).stream()
+        if (param.getIds() != null && !param.getIds().isEmpty()) {
+            result = userRepository.findByIdIn(param.getIds()).stream()
                     .map(this::mapUserDto)
                     .toList();
         } else {
-            PageRequest pageRequest = PageRequest.of(from, size);
+            PageRequest pageRequest = PageRequest.of(param.getFrom(), param.getFrom());
             result = userRepository.findAll(pageRequest).get()
                     .map(this::mapUserDto)
                     .toList();
