@@ -1,6 +1,7 @@
 package ru.practicum.explore.with.me.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
@@ -38,14 +39,14 @@ public class UserController {
     private String app;
 
     @GetMapping("/admin/users")
-    public List<UserDto> find(@RequestParam
+    public List<UserDto> find(@RequestParam(required = false)
                               List<Long> ids,
                               @RequestParam(defaultValue = "0")
                               @PositiveOrZero(message = "must be positive or zero")
                               int from,
                               @RequestParam(defaultValue = "10")
                               @Positive(message = "must be positive")
-                                  int size,
+                              int size,
                               HttpServletRequest request) {
         saveStats(request);
         log.trace("UserController: find() call with ids: {}, from: {}, size: {}", ids, from, size);
@@ -54,7 +55,9 @@ public class UserController {
 
     @PostMapping("/admin/users")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto create(@RequestBody NewUserRequest newUserRequest,
+    public UserDto create(@RequestBody
+                          @Valid
+                          NewUserRequest newUserRequest,
                           HttpServletRequest request) {
         saveStats(request);
         log.trace("UserController: create() call with newUserRequest: {}", newUserRequest);

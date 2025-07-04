@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explore.with.me.mapper.UserMapper;
 import ru.practicum.explore.with.me.model.user.NewUserRequest;
 import ru.practicum.explore.with.me.model.user.User;
@@ -29,12 +30,12 @@ public class UserServiceImpl implements UserService, ExistenceValidator<User>, D
 
         if (ids != null && !ids.isEmpty()) {
             result = userRepository.findByIdIn(ids).stream()
-                    .map(this::getUserDto)
+                    .map(this::mapUserDto)
                     .toList();
         } else {
             PageRequest pageRequest = PageRequest.of(from, size);
             result = userRepository.findAll(pageRequest).get()
-                    .map(this::getUserDto)
+                    .map(this::mapUserDto)
                     .toList();
         }
 
@@ -42,21 +43,26 @@ public class UserServiceImpl implements UserService, ExistenceValidator<User>, D
         return result;
     }
 
+    @Transactional
     @Override
     public UserDto create(NewUserRequest newUserRequest) {
-        return null;
+        UserDto result = mapUserDto(userRepository.save(mapEntity(newUserRequest)));
+        log.info("UserServiceImpl: result of create():: {}", result);
+        return result;
     }
 
+    @Transactional
     @Override
     public void delete(Long userId) {
-
+        userRepository.deleteById(userId);
+        log.info("UserServiceImpl: user with id: {} has been deleted ", userId);
     }
 
-    private User getEntity(NewUserRequest newUserRequest) {
+    private User mapEntity(NewUserRequest newUserRequest) {
         return userMapper.toEntity(newUserRequest);
     }
 
-    private UserDto getUserDto(User user) {
+    private UserDto mapUserDto(User user) {
         return userMapper.toDto(user);
     }
 
@@ -69,7 +75,8 @@ public class UserServiceImpl implements UserService, ExistenceValidator<User>, D
     public void validateExists(Long id) {
         if (userRepository.findById(id).isEmpty()) {
             log.info("attempt to find user with id: {}", id);
-            //throw new NotFoundException("reason", "message");
+            throw new RuntimeException();
+            //todo throw new NotFoundException("reason", "message");
             // ждём ветку main_svc_exceptions
         }
     }
