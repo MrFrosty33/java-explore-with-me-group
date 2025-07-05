@@ -1,4 +1,4 @@
-package ru.practicum.explore.with.me.category;
+package ru.practicum.explore.with.me.controller.category;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.explore.with.me.category.dto.CategoryDto;
+import ru.practicum.explore.with.me.model.category.CategoryDto;
+import ru.practicum.explore.with.me.service.CategoryServiceImpl;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package ru.practicum.explore.with.me.category;
+package ru.practicum.explore.with.me.controller.category;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -13,8 +13,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.explore.with.me.category.dto.CategoryDto;
-import ru.practicum.explore.with.me.category.dto.NewCategoryDto;
+import ru.practicum.explore.with.me.model.category.CategoryDto;
+import ru.practicum.explore.with.me.model.category.NewCategoryDto;
+import ru.practicum.explore.with.me.service.CategoryServiceImpl;
 
 @RestController
 @RequestMapping("/admin/categories")

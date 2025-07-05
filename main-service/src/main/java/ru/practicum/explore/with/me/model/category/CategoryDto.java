@@ -1,4 +1,4 @@
-package ru.practicum.explore.with.me.category.dto;
+package ru.practicum.explore.with.me.model.category;
 
 import lombok.Data;
 

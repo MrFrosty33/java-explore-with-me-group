@@ -1,4 +1,4 @@
-package ru.practicum.explore.with.me.category.dto;
+package ru.practicum.explore.with.me.model.category;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;

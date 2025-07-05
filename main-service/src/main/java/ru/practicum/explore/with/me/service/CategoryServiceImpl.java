@@ -1,10 +1,13 @@
-package ru.practicum.explore.with.me.category;
+package ru.practicum.explore.with.me.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.explore.with.me.category.dto.CategoryDto;
-import ru.practicum.explore.with.me.category.dto.NewCategoryDto;
+import ru.practicum.explore.with.me.mapper.CategoryMapper;
+import ru.practicum.explore.with.me.model.category.Category;
+import ru.practicum.explore.with.me.model.category.CategoryDto;
+import ru.practicum.explore.with.me.model.category.NewCategoryDto;
+import ru.practicum.explore.with.me.repository.CategoryRepository;
 import ru.practicum.explore.with.me.util.ExistenceValidator;
 
 import java.util.List;

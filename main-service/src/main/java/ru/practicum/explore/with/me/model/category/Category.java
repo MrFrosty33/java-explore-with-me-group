@@ -1,4 +1,4 @@
-package ru.practicum.explore.with.me.category;
+package ru.practicum.explore.with.me.model.category;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

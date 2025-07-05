@@ -1,8 +1,9 @@
-package ru.practicum.explore.with.me.category;
+package ru.practicum.explore.with.me.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import ru.practicum.explore.with.me.model.category.Category;
 
 import java.util.List;
 
