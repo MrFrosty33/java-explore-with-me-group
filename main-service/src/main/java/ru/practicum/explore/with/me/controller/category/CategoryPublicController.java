@@ -21,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Validated
 @Slf4j
-public class PublicCategoryController {
+public class CategoryPublicController {
     private final CategoryServiceImpl categoryService;
 
     @GetMapping
