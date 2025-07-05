@@ -1,0 +1,74 @@
+package ru.practicum.explore.with.me.category;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import ru.practicum.explore.with.me.category.dto.CategoryDto;
+import ru.practicum.explore.with.me.category.dto.NewCategoryDto;
+import ru.practicum.explore.with.me.util.ExistenceValidator;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class CategoryServiceImpl implements ExistenceValidator<Category>, CategoryService {
+    private final CategoryRepository categoryRepository;
+
+    @Override
+    public void validateExists(Long id) {
+        if (!categoryRepository.existsById(id)) {
+            log.info("Category with id {} not found", id);
+            // throw new NotFoundException("The required object was not found.",
+            //        "Category with id=" + id + " was not found");
+        }
+    }
+
+    private void validateNameUnique(String categoryName) {
+        if (categoryRepository.isExistName(categoryName)) {
+            log.info("Category with name {} already exists", categoryName);
+            //throw new ConflictException("The name of category should be unique.",
+            //          "Category with name=" + name + " is already exist");
+        }
+    }
+
+    @Override
+    public CategoryDto createCategory(NewCategoryDto categoryDto) {
+        validateNameUnique(categoryDto.getName());
+        Category category = categoryRepository.save(CategoryMapper.toModel(categoryDto));
+        return CategoryMapper.toDto(category);
+    }
+
+    @Override
+    public void deleteCategory(long id) {
+        validateExists(id);
+        categoryRepository.deleteById(id);
+    }
+
+    @Override
+    public CategoryDto updateCategory(long id, NewCategoryDto categoryDto) {
+        Category categoryToUpdate = categoryRepository.findById(id).orElseThrow(
+                // () -> new NotFoundException("The required object was not found.",
+                //        "Category with id=" + id + " was not found")
+        );
+        validateNameUnique(categoryDto.getName());
+        categoryToUpdate.setName(categoryDto.getName());
+        Category category = categoryRepository.save(categoryToUpdate);
+        return CategoryMapper.toDto(category);
+    }
+
+    @Override
+    public CategoryDto getCategory(long id) {
+        Category category = categoryRepository.findById(id).orElseThrow(
+                // () -> new NotFoundException("The required object was not found.",
+                //        "Category with id=" + id + " was not found")
+        );
+        return CategoryMapper.toDto(category);
+    }
+
+    @Override
+    public List<CategoryDto> getCategories(int from, int size) {
+        return categoryRepository.findCategoriesWitOffsetAndLimit(from, size)
+                .stream().map(CategoryMapper::toDto).toList();
+    }
+}
