@@ -8,9 +8,9 @@ import ru.practicum.explore.with.me.model.user.UserShortDto;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-    UserDto toDto(User user);
+    UserDto toDto(User entity);
 
-    UserShortDto toShortDto(User user);
+    UserShortDto toShortDto(User entity);
 
     User toEntity(NewUserRequest newUserRequest);
 }

@@ -7,9 +7,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,27 +17,24 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.explore.with.me.model.user.AdminFindUserParam;
+import ru.practicum.explore.with.me.model.user.AdminUserFindParam;
 import ru.practicum.explore.with.me.model.user.NewUserRequest;
 import ru.practicum.explore.with.me.model.user.UserDto;
 import ru.practicum.explore.with.me.service.UserService;
-import ru.practicum.stat.client.StatClient;
-import ru.practicum.stat.dto.EndpointHitCreate;
+import ru.practicum.explore.with.me.util.StatsSaver;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-@RestController
+@RestController("/admin")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
 @Validated
-public class UserController {
+public class UserAdminController {
     private final UserService service;
-    private final StatClient statClient;
-    @Value("${app}")
-    private String app;
+    private final StatsSaver statsSaver;
+    private final String controllerName = "UserAdminController";
 
-    @GetMapping("/admin/users")
+    @GetMapping("/users")
     public List<UserDto> find(@RequestParam(required = false)
                               List<Long> ids,
                               @RequestParam(defaultValue = "0")
@@ -49,10 +44,10 @@ public class UserController {
                               @Positive(message = "must be positive")
                               int size,
                               HttpServletRequest request) {
-        saveStats(request);
-        log.trace("UserController: find() call with ids: {}, from: {}, size: {}", ids, from, size);
+        statsSaver.save(request, controllerName);
+        log.trace("{}: find() call with ids: {}, from: {}, size: {}", controllerName, ids, from, size);
 
-        AdminFindUserParam param = AdminFindUserParam.builder()
+        AdminUserFindParam param = AdminUserFindParam.builder()
                 .ids(ids)
                 .from(from)
                 .size(size)
@@ -60,43 +55,26 @@ public class UserController {
         return service.find(param);
     }
 
-    @PostMapping("/admin/users")
+    @PostMapping("/users")
     @ResponseStatus(HttpStatus.CREATED)
     public UserDto create(@RequestBody
                           @Valid
                           NewUserRequest newUserRequest,
                           HttpServletRequest request) {
-        saveStats(request);
-        log.trace("UserController: create() call with newUserRequest: {}", newUserRequest);
+        statsSaver.save(request, controllerName);
+        log.trace("{}: create() call with newUserRequest: {}", controllerName, newUserRequest);
         return service.create(newUserRequest);
     }
 
-    @DeleteMapping("/admin/users/{userId}")
+    @DeleteMapping("/users/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable
                        @Positive(message = "must be positive")
-                           Long userId,
+                       Long userId,
                        HttpServletRequest request) {
-        saveStats(request);
-        log.trace("UserController: delete() call with userId: {}", userId);
+        statsSaver.save(request, controllerName);
+        log.trace("{}: delete() call with userId: {}", controllerName, userId);
         service.delete(userId);
-    }
-
-    private void saveStats(HttpServletRequest request) {
-        EndpointHitCreate hitCreate = EndpointHitCreate.builder()
-                .app(app)
-                .ip(request.getRemoteAddr())
-                .uri(request.getRequestURI())
-                .timestamp(LocalDateTime.now())
-                .build();
-
-        log.trace("UserController: saving stats with endpoint: {}", hitCreate.getUri());
-        ResponseEntity<Void> statResult = statClient.createHit(hitCreate);
-        if (!statResult.getStatusCode().is2xxSuccessful()) {
-            log.trace("UserController: stats saved successfully");
-        } else {
-            log.trace("UserController: error acquired when saving stats");
-        }
     }
 
 }

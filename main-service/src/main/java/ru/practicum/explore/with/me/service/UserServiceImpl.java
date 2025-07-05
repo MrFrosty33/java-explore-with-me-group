@@ -7,7 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explore.with.me.mapper.UserMapper;
-import ru.practicum.explore.with.me.model.user.AdminFindUserParam;
+import ru.practicum.explore.with.me.model.user.AdminUserFindParam;
 import ru.practicum.explore.with.me.model.user.NewUserRequest;
 import ru.practicum.explore.with.me.model.user.User;
 import ru.practicum.explore.with.me.model.user.UserDto;
@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService, ExistenceValidator<User>, D
     private final UserMapper userMapper;
 
     @Override
-    public List<UserDto> find(AdminFindUserParam param) {
+    public List<UserDto> find(AdminUserFindParam param) {
         List<UserDto> result;
 
         if (param.getIds() != null && !param.getIds().isEmpty()) {

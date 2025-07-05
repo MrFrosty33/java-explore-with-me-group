@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
-public class AdminFindUserParam {
+public class AdminUserFindParam {
     private List<Long> ids;
     private int from;
     private int size;
