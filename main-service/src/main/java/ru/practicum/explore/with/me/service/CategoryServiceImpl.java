@@ -8,6 +8,7 @@ import ru.practicum.explore.with.me.model.category.Category;
 import ru.practicum.explore.with.me.model.category.CategoryDto;
 import ru.practicum.explore.with.me.model.category.NewCategoryDto;
 import ru.practicum.explore.with.me.repository.CategoryRepository;
+import ru.practicum.explore.with.me.util.DataProvider;
 import ru.practicum.explore.with.me.util.ExistenceValidator;
 
 import java.util.List;
@@ -15,7 +16,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CategoryServiceImpl implements ExistenceValidator<Category>, CategoryService {
+public class CategoryServiceImpl implements ExistenceValidator<Category>,
+        CategoryService, DataProvider<CategoryDto, Category> {
     private final CategoryRepository categoryRepository;
 
     @Override
@@ -25,6 +27,11 @@ public class CategoryServiceImpl implements ExistenceValidator<Category>, Catego
             // throw new NotFoundException("The required object was not found.",
             //        "Category with id=" + id + " was not found");
         }
+    }
+
+    @Override
+    public CategoryDto getDto(Category entity) {
+        return CategoryMapper.toDto(entity);
     }
 
     private void validateNameUnique(String categoryName) {
@@ -44,7 +51,7 @@ public class CategoryServiceImpl implements ExistenceValidator<Category>, Catego
 
     @Override
     public void deleteCategory(long id) {
-        validateExists(id);
+        //validateExists(id);
         categoryRepository.deleteById(id);
     }
 
