@@ -25,12 +25,12 @@ import ru.practicum.explore.with.me.service.CategoryServiceImpl;
 @RequiredArgsConstructor
 @Validated
 @Slf4j
-@Transactional
 public class CategoryAdminController {
     private final CategoryServiceImpl categoryService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @Transactional
     public CategoryDto createCategory(@RequestBody @Valid NewCategoryDto category) {
         log.info("Create new category: {}", category);
         return categoryService.createCategory(category);
@@ -38,6 +38,7 @@ public class CategoryAdminController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Transactional
     public void deleteCategory(@PathVariable @NotNull @PositiveOrZero Long id) {
         log.info("Delete category with id: {}", id);
         categoryService.deleteCategory(id);
@@ -45,6 +46,7 @@ public class CategoryAdminController {
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @Transactional
     public CategoryDto updateCategory(@PathVariable @NotNull @PositiveOrZero Long id,
                                       @RequestBody @Valid NewCategoryDto category) {
         log.info("Update category with id: {}", id);

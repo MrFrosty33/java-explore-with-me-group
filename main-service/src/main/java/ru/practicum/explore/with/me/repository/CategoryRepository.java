@@ -8,7 +8,7 @@ import ru.practicum.explore.with.me.model.category.Category;
 import java.util.List;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
-    @Query("SELECT COUNT(c) > 1 FROM Category c WHERE c.name = :name")
+    @Query("SELECT COUNT(c) > 0 FROM Category c WHERE c.name = :name")
     boolean isExistName(@Param("name") String name);
 
     @Query("SELECT DISTINCT c FROM Category c ORDER BY c.id ASC LIMIT :size OFFSET :from")
