@@ -19,6 +19,7 @@ import java.util.List;
 public class CategoryServiceImpl implements ExistenceValidator<Category>,
         CategoryService, DataProvider<CategoryDto, Category> {
     private final CategoryRepository categoryRepository;
+    private final CategoryMapper categoryMapper;
 
     @Override
     public void validateExists(Long id) {
@@ -31,7 +32,7 @@ public class CategoryServiceImpl implements ExistenceValidator<Category>,
 
     @Override
     public CategoryDto getDto(Category entity) {
-        return CategoryMapper.toDto(entity);
+        return categoryMapper.toDto(entity);
     }
 
     private void validateNameUnique(String categoryName) {
@@ -45,8 +46,8 @@ public class CategoryServiceImpl implements ExistenceValidator<Category>,
     @Override
     public CategoryDto createCategory(NewCategoryDto categoryDto) {
         validateNameUnique(categoryDto.getName());
-        Category category = categoryRepository.save(CategoryMapper.toModel(categoryDto));
-        return CategoryMapper.toDto(category);
+        Category category = categoryRepository.save(categoryMapper.toModel(categoryDto));
+        return categoryMapper.toDto(category);
     }
 
     @Override
@@ -64,7 +65,7 @@ public class CategoryServiceImpl implements ExistenceValidator<Category>,
         validateNameUnique(categoryDto.getName());
         categoryToUpdate.setName(categoryDto.getName());
         Category category = categoryRepository.save(categoryToUpdate);
-        return CategoryMapper.toDto(category);
+        return categoryMapper.toDto(category);
     }
 
     @Override
@@ -73,12 +74,12 @@ public class CategoryServiceImpl implements ExistenceValidator<Category>,
                 // () -> new NotFoundException("The required object was not found.",
                 //        "Category with id=" + id + " was not found")
         );
-        return CategoryMapper.toDto(category);
+        return categoryMapper.toDto(category);
     }
 
     @Override
     public List<CategoryDto> getCategories(int from, int size) {
         return categoryRepository.findCategoriesWitOffsetAndLimit(from, size)
-                .stream().map(CategoryMapper::toDto).toList();
+                .stream().map(categoryMapper::toDto).toList();
     }
 }
