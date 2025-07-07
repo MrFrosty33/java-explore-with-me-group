@@ -1,7 +1,9 @@
 package ru.practicum.explore.with.me.model.event;
 
 import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 
+@Converter(autoApply = true)
 public class EventStateConverter implements AttributeConverter<EventState, String> {
     @Override
     public String convertToDatabaseColumn(EventState status) {
