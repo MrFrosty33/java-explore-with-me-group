@@ -2,6 +2,9 @@ package ru.practicum.explore.with.me.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.explore.with.me.mapper.CategoryMapper;
 import ru.practicum.explore.with.me.model.category.Category;
@@ -79,7 +82,8 @@ public class CategoryServiceImpl implements ExistenceValidator<Category>,
 
     @Override
     public List<CategoryDto> getCategories(int from, int size) {
-        return categoryRepository.findCategoriesWitOffsetAndLimit(from, size)
+        Pageable pageable = PageRequest.of(from, size, Sort.by("id").ascending());
+        return categoryRepository.findAllDistinct(pageable).getContent()
                 .stream().map(categoryMapper::toDto).toList();
     }
 }
