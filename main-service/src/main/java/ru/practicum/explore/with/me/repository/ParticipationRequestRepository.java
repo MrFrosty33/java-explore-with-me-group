@@ -8,4 +8,9 @@ import java.util.List;
 public interface ParticipationRequestRepository extends JpaRepository<ParticipationRequest, Long> {
 
     List<ParticipationRequest> findAllByRequesterId(Long requesterId);
+
+
+    boolean existsByRequesterIdAndEventId(Long requesterId, Long eventId);
+
+    int countByEventId(Long eventId);
 }

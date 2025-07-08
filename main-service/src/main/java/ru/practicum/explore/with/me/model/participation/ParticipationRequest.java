@@ -1,6 +1,7 @@
 package ru.practicum.explore.with.me.model.participation;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,6 +14,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.practicum.explore.with.me.model.event.Event;
 import ru.practicum.explore.with.me.model.user.User;
 
 import java.time.LocalDateTime;
@@ -31,14 +33,13 @@ public class ParticipationRequest {
     @Column
     private LocalDateTime created;
 
-    //todo ждём реализацию Event
-//    @OneToOne
-//    @JoinColumn(name = "events_id")
-//    private Event event;
-
+    @OneToOne
+    @JoinColumn(name = "events_id")
+    private Event event;
     @OneToOne
     @JoinColumn(name = "users_id")
     private User requester;
-    @Column
-    private Status status;
+
+    @Convert(converter = ParticipationRequestStatusConverter.class)
+    private ParticipationRequestStatus status;
 }

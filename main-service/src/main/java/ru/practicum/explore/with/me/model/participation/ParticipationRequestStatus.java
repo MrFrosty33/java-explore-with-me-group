@@ -1,5 +1,5 @@
 package ru.practicum.explore.with.me.model.participation;
 
-public enum Status {
+public enum ParticipationRequestStatus {
     CONFIRMED, REJECTED, PENDING;
 }

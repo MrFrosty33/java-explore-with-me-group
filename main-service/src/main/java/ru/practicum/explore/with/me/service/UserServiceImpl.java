@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.explore.with.me.exception.NotFoundException;
 import ru.practicum.explore.with.me.mapper.UserMapper;
 import ru.practicum.explore.with.me.model.user.AdminUserFindParam;
 import ru.practicum.explore.with.me.model.user.NewUserRequest;
@@ -76,9 +77,8 @@ public class UserServiceImpl implements UserService, ExistenceValidator<User>, D
     public void validateExists(Long id) {
         if (userRepository.findById(id).isEmpty()) {
             log.info("attempt to find user with id: {}", id);
-            throw new RuntimeException();
-            //todo throw new NotFoundException("reason", "message");
-            // ждём ветку main_svc_exceptions
+            throw new NotFoundException("The required object was not found.",
+                    "User with id=" + id + " was not found");
         }
     }
 }

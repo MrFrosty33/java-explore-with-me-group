@@ -4,22 +4,24 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.explore.with.me.exception.NotFoundException;
 import ru.practicum.explore.with.me.mapper.EventMapper;
 import ru.practicum.explore.with.me.model.Category;
-import ru.practicum.explore.with.me.model.User;
 import ru.practicum.explore.with.me.model.event.Event;
 import ru.practicum.explore.with.me.model.event.EventFullDto;
 import ru.practicum.explore.with.me.model.event.EventState;
 import ru.practicum.explore.with.me.model.event.NewEventDto;
+import ru.practicum.explore.with.me.model.user.User;
 import ru.practicum.explore.with.me.repository.CategoryRepository;
-import ru.practicum.explore.with.me.repository.EventPrivateRepository;
+import ru.practicum.explore.with.me.repository.EventRepository;
 import ru.practicum.explore.with.me.repository.UserRepository;
+import ru.practicum.explore.with.me.util.ExistenceValidator;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class EventsPrivateService {
-    private final EventPrivateRepository eventRepository;
+public class EventServiceImpl implements ExistenceValidator<Event> {
+    private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final EventMapper eventMapper;
@@ -61,5 +63,14 @@ public class EventsPrivateService {
             //          "Category with name=" + name + " is already exist");
         }
         return eventMapper.toFullDto(event);
+    }
+
+    @Override
+    public void validateExists(Long id) {
+        if (eventRepository.findById(id).isEmpty()) {
+            log.info("attempt to find event with id: {}", id);
+            //todo сообщения
+            throw new NotFoundException("reason", "message");
+        }
     }
 }
