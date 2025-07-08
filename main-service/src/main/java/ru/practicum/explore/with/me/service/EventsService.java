@@ -12,14 +12,14 @@ import ru.practicum.explore.with.me.model.event.EventFullDto;
 import ru.practicum.explore.with.me.model.event.EventState;
 import ru.practicum.explore.with.me.model.event.NewEventDto;
 import ru.practicum.explore.with.me.repository.CategoryRepository;
-import ru.practicum.explore.with.me.repository.EventPrivateRepository;
+import ru.practicum.explore.with.me.repository.EventRepository;
 import ru.practicum.explore.with.me.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class EventsPrivateService {
-    private final EventPrivateRepository eventRepository;
+public class EventsService {
+    private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final EventMapper eventMapper;
