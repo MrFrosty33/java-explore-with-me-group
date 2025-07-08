@@ -1,0 +1,55 @@
+package ru.practicum.explore.with.me.controller.category;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.explore.with.me.model.category.CategoryDto;
+import ru.practicum.explore.with.me.model.category.NewCategoryDto;
+import ru.practicum.explore.with.me.service.CategoryServiceImpl;
+
+@RestController
+@RequestMapping("/admin/categories")
+@RequiredArgsConstructor
+@Validated
+@Slf4j
+public class CategoryAdminController {
+    private final CategoryServiceImpl categoryService;
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @Transactional
+    public CategoryDto createCategory(@RequestBody @Valid NewCategoryDto category) {
+        log.info("Create new category: {}", category);
+        return categoryService.createCategory(category);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Transactional
+    public void deleteCategory(@PathVariable @NotNull @PositiveOrZero Long id) {
+        log.info("Delete category with id: {}", id);
+        categoryService.deleteCategory(id);
+    }
+
+    @PatchMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @Transactional
+    public CategoryDto updateCategory(@PathVariable @NotNull @PositiveOrZero Long id,
+                                      @RequestBody @Valid NewCategoryDto category) {
+        log.info("Update category with id: {}", id);
+        return categoryService.updateCategory(id, category);
+    }
+}
