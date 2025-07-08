@@ -251,8 +251,8 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
     public void validateExists(Long id) {
         if (eventRepository.findById(id).isEmpty()) {
             log.info("attempt to find event with id: {}", id);
-            //todo сообщения
-            throw new NotFoundException("reason", "message");
+            throw new NotFoundException("The required object was not found.",
+                    "Event with id=" + id + " was not found");
         }
     }
 }
