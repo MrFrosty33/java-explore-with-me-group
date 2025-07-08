@@ -12,6 +12,7 @@ import ru.practicum.explore.with.me.exception.BadRequestException;
 import ru.practicum.explore.with.me.exception.ConflictException;
 import ru.practicum.explore.with.me.exception.NotFoundException;
 import ru.practicum.explore.with.me.mapper.EventMapper;
+import ru.practicum.explore.with.me.model.user.User;
 import ru.practicum.explore.with.me.model.category.Category;
 import ru.practicum.explore.with.me.model.event.Event;
 import ru.practicum.explore.with.me.model.event.EventState;
@@ -22,7 +23,6 @@ import ru.practicum.explore.with.me.model.event.dto.NewEventDto;
 import ru.practicum.explore.with.me.model.event.dto.UpdateEventUserAction;
 import ru.practicum.explore.with.me.model.event.dto.UpdateEventUserRequest;
 import ru.practicum.explore.with.me.model.event.NewEventDto;
-import ru.practicum.explore.with.me.model.user.User;
 import ru.practicum.explore.with.me.repository.CategoryRepository;
 import ru.practicum.explore.with.me.repository.EventRepository;
 import ru.practicum.explore.with.me.repository.UserRepository;
@@ -35,6 +35,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Map;
+
+import ru.practicum.explore.with.me.util.ExistenceValidator;
 
 @Service
 @RequiredArgsConstructor
@@ -144,11 +146,6 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
         }
         if (updateEvent.getPaid() != null) {
             event.setPaid(updateEvent.getPaid());
-    public void validateExists(Long id) {
-        if (eventRepository.findById(id).isEmpty()) {
-            log.info("attempt to find event with id: {}", id);
-            throw new NotFoundException("The required object was not found.",
-                    "Event with id=" + id + " was not found");
         }
         if (updateEvent.getParticipantLimit() != null) {
             event.setParticipantLimit(updateEvent.getParticipantLimit());
@@ -186,6 +183,7 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
         // confirmedRequest
         return events.stream().map(eventMapper::toShortDto).toList();
     }
+
     public EventFullDto getPublicEventById(long eventId) {
         Event event = eventRepository.findByIdAndState(eventId, "published")
                 .orElseThrow(() -> new NotFoundException("The required object was not found.",
@@ -207,6 +205,8 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
             }
         }
         return views;
+    }
+
     public List<EventShortDto> getPublicEvents(PublicEventParams params) {
         if (params.getRangeStart() != null && params.getRangeEnd() != null
                 && params.getRangeStart().isAfter(params.getRangeEnd())) {
@@ -237,11 +237,22 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
         } catch (Exception e) {
             return null;
         }
+    }
+
     private Sort getSort(EventPublicSort sort) {
         if (sort == null) return Sort.unsorted();
         return switch (sort) {
             case EVENT_DATE -> Sort.by("eventDate").ascending();
             case VIEWS -> Sort.by("views").descending();
         };
+    }
+
+    @Override
+    public void validateExists(Long id) {
+        if (eventRepository.findById(id).isEmpty()) {
+            log.info("attempt to find event with id: {}", id);
+            //todo сообщения
+            throw new NotFoundException("reason", "message");
+        }
     }
 }

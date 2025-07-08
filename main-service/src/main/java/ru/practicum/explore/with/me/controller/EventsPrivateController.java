@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.explore.with.me.model.event.EventFullDto;
 import ru.practicum.explore.with.me.model.event.NewEventDto;
-import ru.practicum.explore.with.me.service.EventsPrivateService;
+import ru.practicum.explore.with.me.service.EventServiceImpl;
 
 @RestController
 @RequestMapping("/users/{userId}/events")
@@ -25,7 +25,7 @@ import ru.practicum.explore.with.me.service.EventsPrivateService;
 @RequiredArgsConstructor
 @Validated
 public class EventsPrivateController {
-    private final EventsPrivateService eventsService;
+    private final EventServiceImpl eventsService;
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)

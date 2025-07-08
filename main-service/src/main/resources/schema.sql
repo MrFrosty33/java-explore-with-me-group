@@ -43,4 +43,3 @@ CREATE TABLE IF NOT EXISTS events
     CONSTRAINT fk_events_category FOREIGN KEY (category_id) REFERENCES categories (id),
     CONSTRAINT fk_events_initiator FOREIGN KEY (initiator_id) REFERENCES users (id)
 );
-
