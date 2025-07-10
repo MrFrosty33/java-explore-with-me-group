@@ -25,7 +25,7 @@ import ru.practicum.explore.with.me.util.StatsSaver;
 
 import java.util.List;
 
-@RestController("/admin")
+@RestController("/admin/users")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
 @Validated
@@ -34,7 +34,7 @@ public class UserAdminController {
     private final StatsSaver statsSaver;
     private final String controllerName = "UserAdminController";
 
-    @GetMapping("/users")
+    @GetMapping
     public List<UserDto> find(@RequestParam(required = false)
                               List<Long> ids,
                               @RequestParam(defaultValue = "0")
@@ -55,7 +55,7 @@ public class UserAdminController {
         return service.find(param);
     }
 
-    @PostMapping("/users")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserDto create(@RequestBody
                           @Valid
@@ -66,7 +66,7 @@ public class UserAdminController {
         return service.create(newUserRequest);
     }
 
-    @DeleteMapping("/users/{userId}")
+    @DeleteMapping("/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable
                        @Positive(message = "must be positive")
