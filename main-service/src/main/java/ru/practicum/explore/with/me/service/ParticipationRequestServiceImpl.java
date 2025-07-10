@@ -101,8 +101,20 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     @Override
     @Transactional
     public ParticipationRequestDto cancel(CancelParticipationRequest cancelParticipationRequest) {
-        validateExists(cancelParticipationRequest.getRequestId());
+        ParticipationRequest request = participationRequestRepository
+                .findById(cancelParticipationRequest.getRequestId())
+                .orElseThrow(() ->
+                        new NotFoundException("The required object was not found.",
+                                "ParticipationRequest with id=" + cancelParticipationRequest.getRequestId() +
+                                        " was not found"));
+        if (!request.getRequester().getId().equals(cancelParticipationRequest.getUserId())) {
+            log.info("ParticipationRequestServiceImpl: attempt to cancel participationRequest by not an owner");
+            throw new ConflictException("Request can be cancelled only by an owner",
+                    "User with id=" + cancelParticipationRequest.getUserId() +
+                            " is not an owner of request with id=" + cancelParticipationRequest.getRequestId());
+        }
         userExistenceValidator.validateExists(cancelParticipationRequest.getUserId());
+
 
         ParticipationRequestDto result = participationRequestMapper.toDto(
                 participationRequestRepository.findById(cancelParticipationRequest.getRequestId()).get());
@@ -113,13 +125,17 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     }
 
     private ParticipationRequest mapEntity(NewParticipationRequest newParticipationRequest) {
-        userExistenceValidator.validateExists(newParticipationRequest.getUserId());
-        eventExistenceValidator.validateExists(newParticipationRequest.getEventId());
+        Long userId = newParticipationRequest.getUserId();
+        Long eventId = newParticipationRequest.getEventId();
 
         ParticipationRequest entity = ParticipationRequest.builder()
                 .created(LocalDateTime.now())
-                .requester(userRepository.findById(newParticipationRequest.getUserId()).get())
-                .event(eventRepository.findById(newParticipationRequest.getEventId()).get())
+                .requester(userRepository.findById(userId).orElseThrow(() ->
+                        new NotFoundException("The required object was not found.",
+                                "User with id=" + userId + " was not found")))
+                .event(eventRepository.findById(eventId).orElseThrow(() ->
+                        new NotFoundException("The required object was not found.",
+                                "Event with id=" + eventId + " was not found")))
                 .status(ParticipationRequestStatus.PENDING)
                 .build();
 
