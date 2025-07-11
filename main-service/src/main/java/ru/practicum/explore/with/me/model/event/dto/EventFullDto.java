@@ -1,11 +1,14 @@
-package ru.practicum.explore.with.me.model.event;
+package ru.practicum.explore.with.me.model.event.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.explore.with.me.model.category.CategoryDto;
+import ru.practicum.explore.with.me.model.event.EventState;
+import ru.practicum.explore.with.me.model.event.Location;
 import ru.practicum.explore.with.me.model.user.UserShortDto;
+
 import java.time.LocalDateTime;
 
 @Data
@@ -36,5 +39,5 @@ public class EventFullDto {
     private boolean requestModeration;
     private EventState state;
     private String title;
-    private int views;
+    private Long views;
 }
