@@ -34,7 +34,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class EventsService {
+public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
@@ -42,6 +42,7 @@ public class EventsService {
     private final StatsGetter statsGetter;
 
     @Transactional
+    @Override
     public EventFullDto createEvent(long userId, NewEventDto eventDto) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("The required object was not found.", "User with id=" + userId + " was not found"));
@@ -60,6 +61,7 @@ public class EventsService {
         return eventFullDto;
     }
 
+    @Override
     public EventFullDto getEventById(long userId, long eventId) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("The required object was not found.", "User with id=" + userId + " was not found"));
@@ -85,6 +87,8 @@ public class EventsService {
         return eventFullDto;
     }
 
+    @Transactional
+    @Override
     public EventFullDto updateEvent(long userId, long eventId, UpdateEventUserRequest updateEvent) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("The required object was not found.", "User with id=" + userId + " was not found"));
@@ -157,6 +161,7 @@ public class EventsService {
         return eventFullDto;
     }
 
+    @Override
     public List<EventShortDto> getEvents(long userId, int from, int count) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("The required object was not found.", "User with id=" + userId + " was not found"));
@@ -173,6 +178,7 @@ public class EventsService {
     }
 
 
+    @Override
     public Map<Long, Long> getEventViews(EventViewsParameters params) {
         List<ViewStats> stats = statsGetter.getEventViewStats(params);
         Map<Long, Long> views = new HashMap<>();
