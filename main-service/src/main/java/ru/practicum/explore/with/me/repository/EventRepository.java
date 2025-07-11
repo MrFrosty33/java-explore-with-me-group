@@ -8,12 +8,13 @@ import org.springframework.data.repository.query.Param;
 import ru.practicum.explore.with.me.model.User;
 import ru.practicum.explore.with.me.model.event.Event;
 
+import java.util.List;
+
 public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("""
             SELECT DISTINCT e FROM Event e
             WHERE e.initiator = :user
-            ORDER BY e.createdOn
             """)
     Page<Event> findEventsByUser(@Param("user") User user,
-                                                  Pageable pageable);
+                                 Pageable pageable);
 }
