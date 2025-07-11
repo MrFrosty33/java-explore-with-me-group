@@ -16,6 +16,14 @@ import ru.practicum.explore.with.me.model.user.User;
 import ru.practicum.explore.with.me.model.category.Category;
 import ru.practicum.explore.with.me.model.event.Event;
 import ru.practicum.explore.with.me.model.event.EventState;
+import ru.practicum.explore.with.me.model.event.NewEventDto;
+import ru.practicum.explore.with.me.model.user.User;
+import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
+import ru.practicum.explore.with.me.model.event.dto.EventShortDto;
+import ru.practicum.explore.with.me.model.event.dto.EventViewsParameters;
+import ru.practicum.explore.with.me.model.event.dto.NewEventDto;
+import ru.practicum.explore.with.me.model.event.dto.UpdateEventUserAction;
+import ru.practicum.explore.with.me.model.event.dto.UpdateEventUserRequest;
 import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
 import ru.practicum.explore.with.me.model.event.dto.EventShortDto;
 import ru.practicum.explore.with.me.model.event.dto.EventViewsParameters;
@@ -37,6 +45,13 @@ import java.util.stream.Collectors;
 import java.util.Map;
 
 import ru.practicum.explore.with.me.util.ExistenceValidator;
+import ru.practicum.explore.with.me.util.StatsGetter;
+import ru.practicum.stat.dto.ViewStats;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -255,4 +270,5 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
                     "Event with id=" + id + " was not found");
         }
     }
+
 }
