@@ -12,6 +12,8 @@ import ru.practicum.explore.with.me.model.event.PublicEventParams;
 import java.util.List;
 import java.util.Optional;
 
+import java.util.List;
+
 public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("""
             SELECT DISTINCT e FROM Event e
