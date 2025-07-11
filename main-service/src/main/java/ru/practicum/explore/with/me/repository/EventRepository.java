@@ -8,8 +8,6 @@ import org.springframework.data.repository.query.Param;
 import ru.practicum.explore.with.me.model.User;
 import ru.practicum.explore.with.me.model.event.Event;
 
-import java.util.List;
-
 public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("""
             SELECT DISTINCT e FROM Event e
