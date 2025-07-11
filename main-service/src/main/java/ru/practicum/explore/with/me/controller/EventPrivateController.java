@@ -24,7 +24,7 @@ import ru.practicum.explore.with.me.service.EventServiceImpl;
 @Slf4j
 @RequiredArgsConstructor
 @Validated
-public class EventsPrivateController {
+public class EventPrivateController {
     private final EventServiceImpl eventsService;
 
     @PostMapping()

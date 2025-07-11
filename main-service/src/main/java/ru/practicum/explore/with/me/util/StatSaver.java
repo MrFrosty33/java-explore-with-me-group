@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class StatsSaver {
+public class StatSaver {
     private final StatClient statClient;
     @Value("${app}")
     private String app;
