@@ -13,7 +13,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StatsGetter {
     private final StatClient statClient;
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public List<ViewStats> getEventViewStats(EventViewsParameters params) {
         return statClient.getStats(
