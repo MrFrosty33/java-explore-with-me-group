@@ -21,7 +21,6 @@ import ru.practicum.explore.with.me.model.user.AdminUserFindParam;
 import ru.practicum.explore.with.me.model.user.NewUserRequest;
 import ru.practicum.explore.with.me.model.user.UserDto;
 import ru.practicum.explore.with.me.service.UserService;
-import ru.practicum.explore.with.me.util.StatsSaver;
 
 import java.util.List;
 
@@ -31,7 +30,6 @@ import java.util.List;
 @Validated
 public class UserAdminController {
     private final UserService service;
-    private final StatsSaver statsSaver;
     private final String controllerName = "UserAdminController";
 
     @GetMapping
@@ -44,7 +42,6 @@ public class UserAdminController {
                               @Positive(message = "must be positive")
                               int size,
                               HttpServletRequest request) {
-        statsSaver.save(request, controllerName);
         log.trace("{}: find() call with ids: {}, from: {}, size: {}", controllerName, ids, from, size);
 
         AdminUserFindParam param = AdminUserFindParam.builder()
@@ -61,7 +58,6 @@ public class UserAdminController {
                           @Valid
                           NewUserRequest newUserRequest,
                           HttpServletRequest request) {
-        statsSaver.save(request, controllerName);
         log.trace("{}: create() call with newUserRequest: {}", controllerName, newUserRequest);
         return service.create(newUserRequest);
     }
@@ -72,7 +68,6 @@ public class UserAdminController {
                        @Positive(message = "must be positive")
                        Long userId,
                        HttpServletRequest request) {
-        statsSaver.save(request, controllerName);
         log.trace("{}: delete() call with userId: {}", controllerName, userId);
         service.delete(userId);
     }
