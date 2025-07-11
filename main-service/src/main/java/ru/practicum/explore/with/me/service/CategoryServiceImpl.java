@@ -6,6 +6,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import ru.practicum.explore.with.me.exception.ConflictException;
+import ru.practicum.explore.with.me.exception.NotFoundException;
 import ru.practicum.explore.with.me.mapper.CategoryMapper;
 import ru.practicum.explore.with.me.model.category.Category;
 import ru.practicum.explore.with.me.model.category.CategoryDto;
@@ -28,8 +30,8 @@ public class CategoryServiceImpl implements ExistenceValidator<Category>,
     public void validateExists(Long id) {
         if (!categoryRepository.existsById(id)) {
             log.info("Category with id {} not found", id);
-            // throw new NotFoundException("The required object was not found.",
-            //        "Category with id=" + id + " was not found");
+            throw new NotFoundException("The required object was not found.",
+                    "Category with id=" + id + " was not found");
         }
     }
 
@@ -41,8 +43,8 @@ public class CategoryServiceImpl implements ExistenceValidator<Category>,
     private void validateNameUnique(String categoryName) {
         if (categoryRepository.isExistName(categoryName)) {
             log.info("Category with name {} already exists", categoryName);
-            //throw new ConflictException("The name of category should be unique.",
-            //          "Category with name=" + name + " is already exist");
+            throw new ConflictException("The name of category should be unique.",
+                    "Category with name=" + categoryName + " is already exist");
         }
     }
 
@@ -55,15 +57,15 @@ public class CategoryServiceImpl implements ExistenceValidator<Category>,
 
     @Override
     public void deleteCategory(long id) {
-        //validateExists(id);
+        validateExists(id);
         categoryRepository.deleteById(id);
     }
 
     @Override
     public CategoryDto updateCategory(long id, NewCategoryDto categoryDto) {
         Category categoryToUpdate = categoryRepository.findById(id).orElseThrow(
-                // () -> new NotFoundException("The required object was not found.",
-                //        "Category with id=" + id + " was not found")
+                () -> new NotFoundException("The required object was not found.",
+                        "Category with id=" + id + " was not found")
         );
         validateNameUnique(categoryDto.getName());
         categoryToUpdate.setName(categoryDto.getName());
@@ -74,8 +76,8 @@ public class CategoryServiceImpl implements ExistenceValidator<Category>,
     @Override
     public CategoryDto getCategory(long id) {
         Category category = categoryRepository.findById(id).orElseThrow(
-                // () -> new NotFoundException("The required object was not found.",
-                //        "Category with id=" + id + " was not found")
+                () -> new NotFoundException("The required object was not found.",
+                        "Category with id=" + id + " was not found")
         );
         return categoryMapper.toDto(category);
     }

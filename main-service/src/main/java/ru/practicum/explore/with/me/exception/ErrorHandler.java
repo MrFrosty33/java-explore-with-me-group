@@ -17,7 +17,7 @@ public class ErrorHandler {
     // писать reason & message точно такие, какие ожидаются в спецификации
     // но может не настолько всё будет жёстко проверяться
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(BadRequestException.class)
+    @ExceptionHandler(BadRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleBadRequest(BadRequestException e) {
         writeLog(e);
