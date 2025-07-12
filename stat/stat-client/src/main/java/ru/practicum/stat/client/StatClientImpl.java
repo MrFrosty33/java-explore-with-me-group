@@ -61,13 +61,13 @@ public class StatClientImpl implements StatClient {
         log.trace("StatClient: getStats() call with params: start={}, end={}, uris={}, unique={}",
                 start, end, uris, unique);
 
-        String url = UriComponentsBuilder
+        UriComponentsBuilder builder = UriComponentsBuilder
                 .fromHttpUrl(serverUrl + "/stats")
                 .queryParam("start", start)
                 .queryParam("end", end)
-                .queryParam("uris", uris)
-                .queryParam("unique", unique)
-                .toUriString();
+                .queryParam("unique", unique);
+        uris.forEach(uri -> builder.queryParam("uris", uri));
+        String url = builder.toUriString();
 
         ResponseEntity<List<ViewStats>> result = client
                 .get()
