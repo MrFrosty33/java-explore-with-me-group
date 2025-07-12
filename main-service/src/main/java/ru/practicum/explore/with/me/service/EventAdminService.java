@@ -7,6 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explore.with.me.exception.*;
 import ru.practicum.explore.with.me.mapper.EventMapper;
 import ru.practicum.explore.with.me.model.event.*;
+import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
+import ru.practicum.explore.with.me.model.event.dto.UpdateEventAdminRequestDto;
 import ru.practicum.explore.with.me.repository.*;
 
 import java.time.LocalDateTime;
@@ -14,9 +16,9 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class EventsAdminService {
+public class EventAdminService {
 
-    private final EventAdminRepository eventRepo;
+    private final EventRepository eventRepo;
     private final CategoryRepository categoryRepo;
     private final EventMapper mapper;
 
@@ -32,12 +34,14 @@ public class EventsAdminService {
                     .toList();
         }
 
-        Page<Event> events = eventRepo.search(emptyToNull(f.getUsers()),
+        Page<Event> events = eventRepo.searchForAdmin(
+                emptyToNull(f.getUsers()),
                 states,
                 emptyToNull(f.getCategories()),
                 f.getRangeStart(),
                 f.getRangeEnd(),
-                page);
+                page
+        );
 
         return events.map(mapper::toFullDto).toList();
     }

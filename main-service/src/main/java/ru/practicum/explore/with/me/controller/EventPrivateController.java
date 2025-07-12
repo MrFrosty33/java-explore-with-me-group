@@ -48,8 +48,8 @@ public class EventPrivateController {
     @ResponseStatus(HttpStatus.OK)
     public EventFullDto getEventById(@PathVariable @PositiveOrZero @NotNull Long userId,
                                      @PathVariable @PositiveOrZero @NotNull Long eventId) {
-        log.info("Get event (private scope) {}", eventId);
-        return eventsService.getPrivateEventById(userId, eventId);
+        log.info("Get event {}", eventId);
+        return eventsService.getEventById(userId, eventId);
     }
 
     @PatchMapping("/{eventId}")
