@@ -6,13 +6,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.practicum.explore.with.me.model.User;
+import ru.practicum.explore.with.me.model.user.User;
 import ru.practicum.explore.with.me.model.category.Category;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name="events")
+@Table(name = "events")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,7 +27,7 @@ public class Event {
     private String annotation;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name="category_id")
+    @JoinColumn(name = "category_id")
     private Category category;
 
     @Column(name = "description")
@@ -53,7 +53,7 @@ public class Event {
     private String title;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="initiator_id")
+    @JoinColumn(name = "initiator_id")
     private User initiator;
 
     @Convert(converter = EventStateConverter.class)

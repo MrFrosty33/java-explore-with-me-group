@@ -6,7 +6,6 @@ import ru.practicum.explore.with.me.model.event.dto.EventViewsParameters;
 import ru.practicum.stat.client.StatClient;
 import ru.practicum.stat.dto.ViewStats;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Component

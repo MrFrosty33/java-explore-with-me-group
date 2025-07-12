@@ -1,12 +1,15 @@
-package ru.practicum.explore.with.me.model.event;
+package ru.practicum.explore.with.me.model.event.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
+import ru.practicum.explore.with.me.model.event.Location;
+import ru.practicum.explore.with.me.model.event.StateAction;
 
 import java.time.LocalDateTime;
 
-@Getter @Setter
+@Getter
+@Setter
 public class UpdateEventAdminRequestDto {
     private String annotation;
     private Long category;

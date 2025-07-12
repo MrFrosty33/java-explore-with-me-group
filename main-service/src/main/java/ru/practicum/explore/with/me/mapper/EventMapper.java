@@ -2,10 +2,15 @@ package ru.practicum.explore.with.me.mapper;
 
 import org.mapstruct.*;
 import ru.practicum.explore.with.me.model.event.*;
+import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
+import ru.practicum.explore.with.me.model.event.dto.EventShortDto;
+import ru.practicum.explore.with.me.model.event.dto.NewEventDto;
+import ru.practicum.explore.with.me.model.event.dto.UpdateEventAdminRequestDto;
 
 @Mapper(componentModel = "spring", uses = {UserMapper.class, CategoryMapper.class})
 public interface EventMapper {
     EventFullDto toFullDto(Event event);
+
     EventShortDto toShortDto(Event event);
 
     @Mapping(target = "id", ignore = true)
@@ -17,6 +22,7 @@ public interface EventMapper {
     Event toModel(NewEventDto eventDto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "category", ignore = true)
     void updateFromAdmin(UpdateEventAdminRequestDto dto,
                          @MappingTarget Event entity);
 }

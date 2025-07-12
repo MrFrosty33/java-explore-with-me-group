@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS categories(
     name VARCHAR(50) NOT NULL,
     CONSTRAINT pk_category PRIMARY KEY (id),
     CONSTRAINT uq_category_name UNIQUE (name)
-)
+);
 
 CREATE TABLE IF NOT EXISTS events
 (

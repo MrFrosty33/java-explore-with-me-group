@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explore.with.me.exception.ConflictException;
 import ru.practicum.explore.with.me.exception.NotFoundException;
 import ru.practicum.explore.with.me.mapper.EventMapper;
-import ru.practicum.explore.with.me.model.User;
+import ru.practicum.explore.with.me.model.user.User;
 import ru.practicum.explore.with.me.model.category.Category;
 import ru.practicum.explore.with.me.model.event.Event;
 import ru.practicum.explore.with.me.model.event.EventState;

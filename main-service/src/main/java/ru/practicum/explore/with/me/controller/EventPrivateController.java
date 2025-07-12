@@ -21,7 +21,7 @@ import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
 import ru.practicum.explore.with.me.model.event.dto.EventShortDto;
 import ru.practicum.explore.with.me.model.event.dto.NewEventDto;
 import ru.practicum.explore.with.me.model.event.dto.UpdateEventUserRequest;
-import ru.practicum.explore.with.me.service.EventsService;
+import ru.practicum.explore.with.me.service.EventService;
 
 import java.util.List;
 
@@ -31,14 +31,14 @@ import java.util.List;
 @RequiredArgsConstructor
 @Validated
 public class EventPrivateController {
-    private final EventsService eventsService;
+    private final EventService eventService;
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto createEvent(@PathVariable @PositiveOrZero @NotNull Long userId,
                                     @RequestBody @Valid NewEventDto event) {
         log.info("Create event {}", event);
-        return eventsService.createEvent(userId, event);
+        return eventService.createEvent(userId, event);
     }
 
     @GetMapping("/{eventId}")
@@ -46,7 +46,7 @@ public class EventPrivateController {
     public EventFullDto getEventById(@PathVariable @PositiveOrZero @NotNull Long userId,
                                      @PathVariable @PositiveOrZero @NotNull Long eventId) {
         log.info("Get event {}", eventId);
-        return eventsService.getEventById(userId, eventId);
+        return eventService.getEventById(userId, eventId);
     }
 
     @PatchMapping("/{eventId}")
@@ -55,7 +55,7 @@ public class EventPrivateController {
                                     @PathVariable @PositiveOrZero @NotNull Long eventId,
                                     @RequestBody @Valid UpdateEventUserRequest updateEvent) {
         log.info("Update event {}", eventId);
-        return eventsService.updateEvent(userId, eventId, updateEvent);
+        return eventService.updateEvent(userId, eventId, updateEvent);
     }
 
     @GetMapping()
@@ -64,7 +64,7 @@ public class EventPrivateController {
                                          @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                          @RequestParam(defaultValue = "10") @Positive int size) {
         log.info("Get events by user {}", userId);
-        return eventsService.getEvents(userId, from, size);
+        return eventService.getEvents(userId, from, size);
     }
 
 }
