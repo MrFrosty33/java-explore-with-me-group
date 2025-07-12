@@ -59,8 +59,8 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
     private final ParticipationRequestRepository requestRepository;
     private final ParticipationRequestMapper requestMapper;
 
-    @Override
     @Transactional
+    @Override
     public EventFullDto createEvent(long userId, NewEventDto eventDto) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("The required object was not found.", "User with id=" + userId + " was not found"));

@@ -2,12 +2,13 @@ package ru.practicum.explore.with.me.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore.with.me.model.event.*;
-import ru.practicum.explore.with.me.service.EventsAdminService;
+import ru.practicum.explore.with.me.model.event.dto.AdminEventSearchRequestDto;
+import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
+import ru.practicum.explore.with.me.model.event.dto.UpdateEventAdminRequestDto;
+import ru.practicum.explore.with.me.service.EventAdminService;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -15,23 +16,15 @@ import java.util.List;
 @RequestMapping("/admin/events")
 public class EventsAdminController {
 
-    private final EventsAdminService service;
+    private final EventAdminService service;
 
     // GET /admin/events
     @GetMapping
-    public List<EventFullDto> searchEvents(
-            @RequestParam(required = false) List<Long> users,
-            @RequestParam(required = false) List<String> states,
-            @RequestParam(required = false) List<Long> categories,
-            @RequestParam(required = false)
-            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
-            @RequestParam(required = false)
-            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
-            @RequestParam(defaultValue = "0") int from,
-            @RequestParam(defaultValue = "10") int size) {
-
-        AdminEventFilter f = new AdminEventFilter(users, states, categories, rangeStart, rangeEnd);
-        Pageable page = PageRequest.of(from / size, size);
+    public List<EventFullDto> searchEvents(@ModelAttribute AdminEventSearchRequestDto req) {
+        Pageable page = PageRequest.of(req.getFrom() / req.getSize(), req.getSize());
+        AdminEventFilter f = new AdminEventFilter(
+                req.getUsers(), req.getStates(), req.getCategories(),
+                req.getRangeStart(), req.getRangeEnd());
         return service.search(f, page);
     }
 
