@@ -23,15 +23,17 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     Optional<Event> findByIdAndState(Long id, String state);
 
-    @Query("SELECT e FROM Event AS e " +
-            "WHERE e.state = 'PUBLISHED' " +
-            "AND (:#{#params.text} IS NULL " +
-            "OR LOWER(e.description) LIKE LOWER(CONCAT('%', :#{#params.text}, '%')) " +
-            "OR LOWER(e.annotation) LIKE LOWER(CONCAT('%', :#{#params.text}, '%'))) " +
-            "AND (:#{#params.categories} IS NULL OR e.category.id IN (:#{#params.categories})) " +
-            "AND (:#{#params.paid} IS NULL OR e.paid = :#{#params.paid}) " +
-            "AND ((coalesce(:#{#params.rangeStart}, :#{#params.rangeEnd}) IS NULL AND e.eventDate > now()) " +
-            "OR e.eventDate BETWEEN coalesce(:#{#params.rangeStart}, e.eventDate) AND coalesce(:#{#params.rangeEnd}, e.eventDate))")
+    @Query("""
+            SELECT e FROM Event AS e
+            WHERE e.state = 'PUBLISHED'
+            AND (:#{#params.text} IS NULL
+            OR LOWER(e.description) LIKE LOWER(CONCAT('%', :#{#params.text}, '%'))
+            OR LOWER(e.annotation) LIKE LOWER(CONCAT('%', :#{#params.text}, '%')))
+            AND (:#{#params.categories} IS NULL OR e.category.id IN (:#{#params.categories}))
+            AND (:#{#params.paid} IS NULL OR e.paid = :#{#params.paid}))
+            AND ((coalesce(:#{#params.rangeStart}, :#{#params.rangeEnd}) IS NULL AND e.eventDate > now())
+            OR e.eventDate BETWEEN coalesce(:#{#params.rangeStart}, e.eventDate) AND coalesce(:#{#params.rangeEnd}, e.eventDate))
+            """)
     Page<Event> findPublicEvents(@Param("params") PublicEventParams params, Pageable pageable);
 
 

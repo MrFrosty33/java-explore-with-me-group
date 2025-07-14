@@ -7,15 +7,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 import ru.practicum.explore.with.me.model.event.EventFullDto;
 import ru.practicum.explore.with.me.model.event.EventPublicSort;
 import ru.practicum.explore.with.me.model.event.EventShortDto;
 import ru.practicum.explore.with.me.model.event.PublicEventParams;
-import ru.practicum.explore.with.me.service.EventsService;
+import ru.practicum.explore.with.me.service.EventService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,7 +30,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Validated
 public class EventsPublicController {
-    private final EventsService eventsService;
+    private final EventService eventsService;
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
@@ -52,7 +55,6 @@ public class EventsPublicController {
         publicEventParams.setSort(sort);
         publicEventParams.setFrom(from);
         publicEventParams.setSize(size);
-        publicEventParams.setIpAdr(request.getRemoteAddr());
         log.info("Get all public events with params: {}", publicEventParams);
 
         return eventsService.getPublicEvents(publicEventParams);
