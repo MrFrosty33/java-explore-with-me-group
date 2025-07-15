@@ -19,7 +19,6 @@ public interface EventService {
     EventFullDto createEvent(long userId, NewEventDto eventDto);
 
     EventFullDto getPrivateEventById(long userId, long eventId);
-    EventFullDto getEventById(long userId, long eventId);
 
     @Transactional
     EventFullDto updateEvent(long userId, long eventId, UpdateEventUserRequest updateEvent);
