@@ -1,14 +1,6 @@
 package ru.practicum.explore.with.me.model.participation;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,11 +25,12 @@ public class ParticipationRequest {
     @Column
     private LocalDateTime created;
 
-    @OneToOne
-    @JoinColumn(name = "events_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "event_id")
     private Event event;
-    @OneToOne
-    @JoinColumn(name = "users_id")
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User requester;
 
     @Convert(converter = ParticipationRequestStatusConverter.class)
