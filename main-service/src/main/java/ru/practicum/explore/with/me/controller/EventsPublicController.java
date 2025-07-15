@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
-import ru.practicum.explore.with.me.model.event.EventFullDto;
+import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
 import ru.practicum.explore.with.me.model.event.EventPublicSort;
-import ru.practicum.explore.with.me.model.event.EventShortDto;
+import ru.practicum.explore.with.me.model.event.dto.EventShortDto;
 import ru.practicum.explore.with.me.model.event.PublicEventParams;
 import ru.practicum.explore.with.me.service.EventService;
 

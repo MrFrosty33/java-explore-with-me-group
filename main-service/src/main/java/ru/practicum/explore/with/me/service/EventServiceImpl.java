@@ -15,7 +15,9 @@ import ru.practicum.explore.with.me.mapper.EventMapper;
 import ru.practicum.explore.with.me.mapper.ParticipationRequestMapper;
 import ru.practicum.explore.with.me.model.category.Category;
 import ru.practicum.explore.with.me.model.event.Event;
+import ru.practicum.explore.with.me.model.event.EventPublicSort;
 import ru.practicum.explore.with.me.model.event.EventState;
+import ru.practicum.explore.with.me.model.event.PublicEventParams;
 import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
 import ru.practicum.explore.with.me.model.event.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.explore.with.me.model.event.dto.EventRequestStatusUpdateResult;
@@ -29,21 +31,10 @@ import ru.practicum.explore.with.me.model.participation.ParticipationRequest;
 import ru.practicum.explore.with.me.model.participation.ParticipationRequestDto;
 import ru.practicum.explore.with.me.model.participation.ParticipationRequestStatus;
 import ru.practicum.explore.with.me.model.user.User;
-import ru.practicum.explore.with.me.model.event.NewEventDto;
 import ru.practicum.explore.with.me.repository.CategoryRepository;
 import ru.practicum.explore.with.me.repository.EventRepository;
 import ru.practicum.explore.with.me.repository.ParticipationRequestRepository;
 import ru.practicum.explore.with.me.repository.UserRepository;
-import ru.practicum.explore.with.me.util.ExistenceValidator;
-import ru.practicum.explore.with.me.util.StatsGetter;
-import ru.practicum.stat.dto.ViewStats;
-
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.Map;
-
 import ru.practicum.explore.with.me.util.ExistenceValidator;
 import ru.practicum.explore.with.me.util.StatsGetter;
 import ru.practicum.stat.dto.ViewStats;
@@ -54,6 +45,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -66,7 +58,6 @@ public class EventServiceImpl implements EventService, ExistenceValidator<Event>
     private final StatsGetter statsGetter;
     private final ParticipationRequestRepository requestRepository;
     private final ParticipationRequestMapper requestMapper;
-
 
     @Override
     @Transactional
