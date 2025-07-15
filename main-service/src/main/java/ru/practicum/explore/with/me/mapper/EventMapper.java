@@ -3,13 +3,18 @@ package ru.practicum.explore.with.me.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ru.practicum.explore.with.me.model.event.Event;
-import ru.practicum.explore.with.me.model.event.EventFullDto;
-import ru.practicum.explore.with.me.model.event.EventShortDto;
-import ru.practicum.explore.with.me.model.event.NewEventDto;
+import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
+import ru.practicum.explore.with.me.model.event.dto.EventShortDto;
+import ru.practicum.explore.with.me.model.event.dto.NewEventDto;
 
 @Mapper(componentModel = "spring", uses = {UserMapper.class, CategoryMapper.class})
 public interface EventMapper {
+    @Mapping(target = "confirmedRequests", ignore = true)
+    @Mapping(target = "views", ignore = true)
     EventFullDto toFullDto(Event event);
+
+    @Mapping(target = "confirmedRequests", ignore = true)
+    @Mapping(target = "views", ignore = true)
     EventShortDto toShortDto(Event event);
 
     @Mapping(target = "id", ignore = true)
