@@ -17,7 +17,7 @@ import ru.practicum.explore.with.me.model.category.Category;
 import ru.practicum.explore.with.me.model.event.Event;
 import ru.practicum.explore.with.me.model.event.EventPublicSort;
 import ru.practicum.explore.with.me.model.event.EventState;
-import ru.practicum.explore.with.me.model.event.PublicEventParams;
+import ru.practicum.explore.with.me.model.event.PublicEventParam;
 import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
 import ru.practicum.explore.with.me.model.event.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.explore.with.me.model.event.dto.EventRequestStatusUpdateResult;
@@ -280,7 +280,6 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
         return event;
     }
 
-    public List<EventShortDto> getPublicEvents(PublicEventParams params) {
     public List<EventShortDto> getPublicEvents(PublicEventParam params) {
         if (params.getRangeStart() != null && params.getRangeEnd() != null
                 && params.getRangeStart().isAfter(params.getRangeEnd())) {

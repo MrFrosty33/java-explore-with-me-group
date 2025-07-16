@@ -1,7 +1,6 @@
 package ru.practicum.explore.with.me.service;
 
-import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.explore.with.me.model.event.PublicEventParams;
+import ru.practicum.explore.with.me.model.event.PublicEventParam;
 import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
 import ru.practicum.explore.with.me.model.event.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.explore.with.me.model.event.dto.EventRequestStatusUpdateResult;
@@ -32,5 +31,5 @@ public interface EventService {
     EventRequestStatusUpdateResult updateEventRequestStatus(long userId, long eventId,
                                                             EventRequestStatusUpdateRequest updateRequest);
 
-    List<EventShortDto> getPublicEvents(PublicEventParams params);
+    List<EventShortDto> getPublicEvents(PublicEventParam params);
 }
