@@ -104,7 +104,13 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
         );
 
         // Get events from repository
-        Page<Event> page = eventRepository.findPublicEvents(params, pageable);
+        Page<Event> page = eventRepository.findPublicEvents(
+                params.getText(),
+                params.getCategories(),
+                params.getPaid(),
+                params.getRangeStart(),
+                params.getRangeEnd(),
+                pageable);
 
         return page.getContent()
                 .stream()
