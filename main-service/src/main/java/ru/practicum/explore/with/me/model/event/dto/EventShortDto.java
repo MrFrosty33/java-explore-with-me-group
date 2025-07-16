@@ -1,4 +1,4 @@
-package ru.practicum.explore.with.me.model.event;
+package ru.practicum.explore.with.me.model.event.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
@@ -24,5 +24,5 @@ public class EventShortDto {
     private UserShortDto initiator;
     private boolean paid;
     private String title;
-    private int views;
+    private Long views;
 }
