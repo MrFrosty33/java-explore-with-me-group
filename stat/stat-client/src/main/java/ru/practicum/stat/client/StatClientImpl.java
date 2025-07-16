@@ -20,15 +20,9 @@ import java.util.List;
 @Slf4j
 @Service
 public class StatClientImpl implements StatClient {
-    @Value("${stat.server-url}")
-    private final String serverUrl;
+    @Value("${stats.server-url}")
+    private String serverUrl;
     private final RestClient client;
-
-    public RestClient restClient() {
-        return RestClient.builder()
-                .baseUrl(serverUrl)
-                .build();
-    }
 
     public ResponseEntity<Void> createHit(EndpointHitCreate endpointHitCreate) {
         log.trace("StatClient: createHit() call with endpointHitCreate body: {}", endpointHitCreate);
