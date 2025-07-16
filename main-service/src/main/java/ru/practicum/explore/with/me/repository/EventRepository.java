@@ -33,7 +33,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
               AND (:paid IS NULL OR e.paid = :paid)
               AND (
                   (:rangeStart IS NULL AND :rangeEnd IS NULL AND e.eventDate > CURRENT_TIMESTAMP)
-                  OR 
+                  OR
                   (:rangeStart IS NOT NULL AND :rangeEnd IS NOT NULL AND e.eventDate BETWEEN :rangeStart AND :rangeEnd)
                   OR
                   (:rangeStart IS NOT NULL AND :rangeEnd IS NULL AND e.eventDate >= :rangeStart)
