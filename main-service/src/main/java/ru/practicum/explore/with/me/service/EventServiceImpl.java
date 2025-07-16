@@ -15,11 +15,11 @@ import ru.practicum.explore.with.me.mapper.EventMapper;
 import ru.practicum.explore.with.me.model.category.Category;
 import ru.practicum.explore.with.me.model.event.Event;
 import ru.practicum.explore.with.me.model.event.EventFullDto;
-import ru.practicum.explore.with.me.model.event.EventShortDto;
 import ru.practicum.explore.with.me.model.event.EventPublicSort;
-import ru.practicum.explore.with.me.model.event.PublicEventParams;
+import ru.practicum.explore.with.me.model.event.EventShortDto;
 import ru.practicum.explore.with.me.model.event.EventState;
 import ru.practicum.explore.with.me.model.event.NewEventDto;
+import ru.practicum.explore.with.me.model.event.PublicEventParam;
 import ru.practicum.explore.with.me.model.user.User;
 import ru.practicum.explore.with.me.repository.CategoryRepository;
 import ru.practicum.explore.with.me.repository.EventRepository;
@@ -90,7 +90,7 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
     }
 
     @Override
-    public List<EventShortDto> getPublicEvents(PublicEventParams params) {
+    public List<EventShortDto> getPublicEvents(PublicEventParam params) {
         if (params.getRangeStart() != null && params.getRangeEnd() != null
                 && params.getRangeStart().isAfter(params.getRangeEnd())) {
             throw new BadRequestException("Start date must be before end date",

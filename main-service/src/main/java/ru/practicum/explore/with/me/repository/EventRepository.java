@@ -5,11 +5,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ru.practicum.explore.with.me.model.User;
 import ru.practicum.explore.with.me.model.event.Event;
-import ru.practicum.explore.with.me.model.event.PublicEventParams;
+import ru.practicum.explore.with.me.model.event.PublicEventParam;
+import ru.practicum.explore.with.me.model.user.User;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
@@ -34,7 +33,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             AND ((coalesce(:#{#params.rangeStart}, :#{#params.rangeEnd}) IS NULL AND e.eventDate > now())
             OR e.eventDate BETWEEN coalesce(:#{#params.rangeStart}, e.eventDate) AND coalesce(:#{#params.rangeEnd}, e.eventDate))
             """)
-    Page<Event> findPublicEvents(@Param("params") PublicEventParams params, Pageable pageable);
+    Page<Event> findPublicEvents(@Param("params") PublicEventParam params, Pageable pageable);
 
 
 }

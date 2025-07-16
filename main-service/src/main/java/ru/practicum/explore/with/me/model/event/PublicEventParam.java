@@ -8,7 +8,7 @@ import java.util.Set;
 
 @Setter
 @Getter
-public class PublicEventParams {
+public class PublicEventParam {
     private String text;
     private Set<Long> categories;
     private Boolean paid;
