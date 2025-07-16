@@ -6,13 +6,16 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.practicum.explore.with.me.model.user.User;
 import ru.practicum.explore.with.me.model.category.Category;
+import ru.practicum.explore.with.me.model.participation.ParticipationRequest;
+import ru.practicum.explore.with.me.model.user.User;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Table(name = "events")
+@Table(name="events")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,14 +26,14 @@ public class Event {
     @Column(name = "id")
     private long id;
 
-    @Column(name = "annotation")
+    @Column(name = "annotation", length = 2000)
     private String annotation;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name="category_id")
     private Category category;
 
-    @Column(name = "description")
+    @Column(name = "description", length = 7000)
     private String description;
 
     @Column(name = "event_date")
@@ -49,13 +52,16 @@ public class Event {
     private int participantLimit;
     @Column(name = "request_moderation")
     private boolean requestModeration;
-    @Column(name = "title")
+    @Column(name = "title", length = 120)
     private String title;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "initiator_id")
+    @JoinColumn(name="initiator_id")
     private User initiator;
 
     @Convert(converter = EventStateConverter.class)
     private EventState state;
+
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ParticipationRequest> requests = new ArrayList<>();
 }

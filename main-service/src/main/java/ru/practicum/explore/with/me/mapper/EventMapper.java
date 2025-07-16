@@ -1,16 +1,20 @@
 package ru.practicum.explore.with.me.mapper;
 
-import org.mapstruct.*;
-import ru.practicum.explore.with.me.model.event.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import ru.practicum.explore.with.me.model.event.Event;
 import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
 import ru.practicum.explore.with.me.model.event.dto.EventShortDto;
 import ru.practicum.explore.with.me.model.event.dto.NewEventDto;
-import ru.practicum.explore.with.me.model.event.dto.UpdateEventAdminRequestDto;
 
 @Mapper(componentModel = "spring", uses = {UserMapper.class, CategoryMapper.class})
 public interface EventMapper {
+    @Mapping(target = "confirmedRequests", ignore = true)
+    @Mapping(target = "views", ignore = true)
     EventFullDto toFullDto(Event event);
 
+    @Mapping(target = "confirmedRequests", ignore = true)
+    @Mapping(target = "views", ignore = true)
     EventShortDto toShortDto(Event event);
 
     @Mapping(target = "id", ignore = true)
@@ -20,9 +24,4 @@ public interface EventMapper {
     @Mapping(target = "initiator", ignore = true)
     @Mapping(target = "category", ignore = true)
     Event toModel(NewEventDto eventDto);
-
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "category", ignore = true)
-    void updateFromAdmin(UpdateEventAdminRequestDto dto,
-                         @MappingTarget Event entity);
 }

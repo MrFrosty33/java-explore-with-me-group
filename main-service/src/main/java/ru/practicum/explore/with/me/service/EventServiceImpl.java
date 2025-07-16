@@ -2,47 +2,65 @@ package ru.practicum.explore.with.me.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.explore.with.me.exception.BadRequestException;
 import ru.practicum.explore.with.me.exception.ConflictException;
 import ru.practicum.explore.with.me.exception.NotFoundException;
 import ru.practicum.explore.with.me.mapper.EventMapper;
-import ru.practicum.explore.with.me.model.user.User;
+import ru.practicum.explore.with.me.mapper.ParticipationRequestMapper;
 import ru.practicum.explore.with.me.model.category.Category;
 import ru.practicum.explore.with.me.model.event.Event;
+import ru.practicum.explore.with.me.model.event.EventPublicSort;
 import ru.practicum.explore.with.me.model.event.EventState;
+import ru.practicum.explore.with.me.model.event.PublicEventParam;
 import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
+import ru.practicum.explore.with.me.model.event.dto.EventRequestStatusUpdateRequest;
+import ru.practicum.explore.with.me.model.event.dto.EventRequestStatusUpdateResult;
 import ru.practicum.explore.with.me.model.event.dto.EventShortDto;
 import ru.practicum.explore.with.me.model.event.dto.EventViewsParameters;
 import ru.practicum.explore.with.me.model.event.dto.NewEventDto;
+import ru.practicum.explore.with.me.model.event.dto.StatusUpdateRequest;
 import ru.practicum.explore.with.me.model.event.dto.UpdateEventUserAction;
 import ru.practicum.explore.with.me.model.event.dto.UpdateEventUserRequest;
+import ru.practicum.explore.with.me.model.participation.ParticipationRequest;
+import ru.practicum.explore.with.me.model.participation.ParticipationRequestDto;
+import ru.practicum.explore.with.me.model.participation.ParticipationRequestStatus;
+import ru.practicum.explore.with.me.model.user.User;
 import ru.practicum.explore.with.me.repository.CategoryRepository;
 import ru.practicum.explore.with.me.repository.EventRepository;
+import ru.practicum.explore.with.me.repository.ParticipationRequestRepository;
 import ru.practicum.explore.with.me.repository.UserRepository;
+import ru.practicum.explore.with.me.util.ExistenceValidator;
 import ru.practicum.explore.with.me.util.StatsGetter;
 import ru.practicum.stat.dto.ViewStats;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class EventServiceImpl implements EventService {
+public class EventServiceImpl implements ExistenceValidator<Event>, EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final EventMapper eventMapper;
     private final StatsGetter statsGetter;
+    private final ParticipationRequestRepository requestRepository;
+    private final ParticipationRequestMapper requestMapper;
 
-    @Transactional
     @Override
+    @Transactional
     public EventFullDto createEvent(long userId, NewEventDto eventDto) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("The required object was not found.", "User with id=" + userId + " was not found"));
@@ -62,17 +80,8 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto getEventById(long userId, long eventId) {
-        User user = userRepository.findById(userId).orElseThrow(() ->
-                new NotFoundException("The required object was not found.", "User with id=" + userId + " was not found"));
-        Event event = eventRepository.findById(eventId).orElseThrow(() ->
-                new NotFoundException("The required object was not found.", "Event with id=" + eventId + " was not found"));
-
-        if (event.getInitiator().getId() != userId) {
-            log.info("User with id {} doesn't have an event with id {}", userId, eventId);
-            throw new ConflictException("The name of category should be unique.",
-                    "Category with name=" + event.getCategory().getName() + " is already exist");
-        }
+    public EventFullDto getPrivateEventById(long userId, long eventId) {
+        Event event = getEventIfInitiatedByUser(userId, eventId);
         EventFullDto eventFullDto = eventMapper.toFullDto(event);
 
         EventViewsParameters statParams = EventViewsParameters.builder()
@@ -81,25 +90,14 @@ public class EventServiceImpl implements EventService {
                 .build();
         Map<Long, Long> viewStats = getEventViews(statParams);
         eventFullDto.setViews(viewStats.getOrDefault(eventId, 0L));
-
-        //request
-        eventFullDto.setConfirmedRequests(0);
+        eventFullDto.setConfirmedRequests(requestRepository.countByEventId(eventId));
         return eventFullDto;
     }
 
     @Transactional
     @Override
     public EventFullDto updateEvent(long userId, long eventId, UpdateEventUserRequest updateEvent) {
-        User user = userRepository.findById(userId).orElseThrow(() ->
-                new NotFoundException("The required object was not found.", "User with id=" + userId + " was not found"));
-        Event event = eventRepository.findById(eventId).orElseThrow(() ->
-                new NotFoundException("The required object was not found.", "Event with id=" + eventId + " was not found"));
-
-        if (event.getInitiator().getId() != userId) {
-            log.info("User {} doesn't have an event with id {}", userId, eventId);
-            throw new ConflictException("For the requested operation the conditions are not met.",
-                    "Only initiator of event can it change");
-        }
+        Event event = getEventIfInitiatedByUser(userId, eventId);
 
         if (event.getState() == EventState.PUBLISHED) {
             log.info("User {} cannot change an event {} with state PUBLISHED", userId, eventId);
@@ -155,14 +153,12 @@ public class EventServiceImpl implements EventService {
 
         Map<Long, Long> viewStats = getEventViews(statParams);
         eventFullDto.setViews(viewStats.getOrDefault(eventId, 0L));
-        //request
-        eventFullDto.setConfirmedRequests(0);
-
+        eventFullDto.setConfirmedRequests(requestRepository.countByEventId(eventId));
         return eventFullDto;
     }
 
     @Override
-    public List<EventShortDto> getEvents(long userId, int from, int count) {
+    public List<EventShortDto> getEventsByUser(long userId, int from, int count) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("The required object was not found.", "User with id=" + userId + " was not found"));
         Pageable pageable = PageRequest.of(from, count, Sort.by("createdOn").ascending());
@@ -173,10 +169,87 @@ public class EventServiceImpl implements EventService {
                 .end(LocalDateTime.now())
                 .eventIds(eventIds).unique(true).build();
         Map<Long, Long> viewStats = getEventViews(params);
-        // confirmedRequest
-        return events.stream().map(eventMapper::toShortDto).toList();
+        Map<Long, Integer> confirmedRequests = requestRepository.countGroupByEventId(eventIds);
+        return events.stream().map(event -> {
+            EventShortDto shortDto = eventMapper.toShortDto(event);
+            shortDto.setViews(viewStats.getOrDefault(event.getId(), 0L));
+            shortDto.setConfirmedRequests(confirmedRequests.getOrDefault(event.getId(), 0));
+            return shortDto;
+        }).toList();
     }
 
+    @Override
+    public List<ParticipationRequestDto> getEventParticipationRequestsByUser(long userId, long eventId) {
+        getEventIfInitiatedByUser(userId, eventId);
+        List<ParticipationRequest> requestsByEventId = requestRepository.findAllByEventId(eventId);
+        return requestsByEventId.stream().map(requestMapper::toDto).toList();
+    }
+
+    @Override
+    @Transactional
+    public EventRequestStatusUpdateResult updateEventRequestStatus(long userId, long eventId,
+                                                                   EventRequestStatusUpdateRequest updateRequest) {
+        Event event = getEventIfInitiatedByUser(userId, eventId);
+        List<ParticipationRequest> requestsByEventId = requestRepository.findAllById(updateRequest.getRequestIds());
+
+        if (event.getParticipantLimit() == 0 || !event.isRequestModeration()) {
+            return new EventRequestStatusUpdateResult(
+                    requestsByEventId.stream().map(requestMapper::toDto).toList(), List.of());
+        }
+
+        List<ParticipationRequest> alreadyConfirmed = requestRepository
+                .findAllByEventIdAndStatus(eventId, ParticipationRequestStatus.CONFIRMED);
+        AtomicInteger remainingSpots = new AtomicInteger(event.getParticipantLimit() - alreadyConfirmed.size());
+
+        if (remainingSpots.get() <= 0) {
+            throw new ConflictException("For the requested operation the conditions are not met.",
+                    "The participant limit has been reached");
+        }
+
+        List<ParticipationRequestDto> confirmedDto = new ArrayList<>();
+        List<ParticipationRequestDto> rejectedDto = new ArrayList<>();
+
+        requestsByEventId.forEach(request -> {
+            if (request.getStatus() != ParticipationRequestStatus.PENDING) {
+                throw new ConflictException("For the requested operation the conditions are not met.",
+                        "It's not allowed to change the status of the request");
+            }
+
+            if (remainingSpots.get() > 0 && updateRequest.getStatus() == StatusUpdateRequest.CONFIRMED) {
+                request.setStatus(ParticipationRequestStatus.CONFIRMED);
+                confirmedDto.add(requestMapper.toDto(request));
+                remainingSpots.getAndDecrement();
+            } else {
+                request.setStatus(ParticipationRequestStatus.REJECTED);
+                rejectedDto.add(requestMapper.toDto(request));
+            }
+        });
+
+        requestRepository.updateStatus(
+                confirmedDto.stream().map(ParticipationRequestDto::getId).toList(),
+                ParticipationRequestStatus.CONFIRMED);
+
+        requestRepository.updateStatus(
+                confirmedDto.stream().map(ParticipationRequestDto::getId).toList(),
+                ParticipationRequestStatus.REJECTED);
+
+        if (remainingSpots.get() == 0) {
+            List<Long> pendingIds = requestRepository
+                    .findAllByEventIdAndStatus(eventId, ParticipationRequestStatus.PENDING)
+                    .stream().map(ParticipationRequest::getId).toList();
+            requestRepository.updateStatus(pendingIds, ParticipationRequestStatus.REJECTED);
+        }
+
+        return new EventRequestStatusUpdateResult(confirmedDto, rejectedDto);
+    }
+
+    public EventFullDto getPublicEventById(long eventId) {
+        Event event = eventRepository.findByIdAndState(eventId, "published")
+                .orElseThrow(() -> new NotFoundException("The required object was not found.",
+                        "Event with id=" + eventId + " was not found"));
+
+        return eventMapper.toFullDto(event);
+    }
 
     @Override
     public Map<Long, Long> getEventViews(EventViewsParameters params) {
@@ -193,6 +266,49 @@ public class EventServiceImpl implements EventService {
         return views;
     }
 
+    private Event getEventIfInitiatedByUser(long userId, long eventId) {
+        userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("The required object was not found.", "User with id=" + userId + " was not found"));
+        Event event = eventRepository.findById(eventId).orElseThrow(() ->
+                new NotFoundException("The required object was not found.", "Event with id=" + eventId + " was not found"));
+
+        if (event.getInitiator().getId() != userId) {
+            log.info("User {} cannot manipulate with the event with id {}", userId, eventId);
+            throw new ConflictException("For the requested operation the conditions are not met.",
+                    "Only initiator of event can can manipulate with it");
+        }
+        return event;
+    }
+
+    public List<EventShortDto> getPublicEvents(PublicEventParam params) {
+        if (params.getRangeStart() != null && params.getRangeEnd() != null
+                && params.getRangeStart().isAfter(params.getRangeEnd())) {
+            throw new BadRequestException("Start date must be before end date",
+                    "Start: " + params.getRangeStart() + " End: " + params.getRangeEnd());
+        }
+
+        Pageable pageable = PageRequest.of(
+                params.getFrom() / params.getSize(),
+                params.getSize(),
+                getSort(params.getSort())
+        );
+
+        // Get events from repository
+        Page<Event> page = eventRepository.findPublicEvents(
+                params.getText(),
+                params.getCategories(),
+                params.getPaid(),
+                params.getRangeStart(),
+                params.getRangeEnd(),
+                pageable);
+
+        return page.getContent()
+                .stream()
+                .map(eventMapper::toShortDto)
+                .collect(Collectors.toList());
+
+    }
+
     private Long extractId(String uri) {
         try {
             String[] parts = uri.split("/");
@@ -201,4 +317,22 @@ public class EventServiceImpl implements EventService {
             return null;
         }
     }
+
+    private Sort getSort(EventPublicSort sort) {
+        if (sort == null) return Sort.unsorted();
+        return switch (sort) {
+            case EVENT_DATE -> Sort.by("eventDate").ascending();
+            case VIEWS -> Sort.by("views").descending();
+        };
+    }
+
+    @Override
+    public void validateExists(Long id) {
+        if (eventRepository.findById(id).isEmpty()) {
+            log.info("attempt to find event with id: {}", id);
+            throw new NotFoundException("The required object was not found.",
+                    "Event with id=" + id + " was not found");
+        }
+    }
+
 }
