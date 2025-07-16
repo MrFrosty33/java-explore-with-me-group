@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class EventServiceImpl implements EventService, ExistenceValidator<Event> {
+public class EventServiceImpl implements ExistenceValidator<Event>, EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
@@ -281,6 +281,7 @@ public class EventServiceImpl implements EventService, ExistenceValidator<Event>
     }
 
     public List<EventShortDto> getPublicEvents(PublicEventParams params) {
+    public List<EventShortDto> getPublicEvents(PublicEventParam params) {
         if (params.getRangeStart() != null && params.getRangeEnd() != null
                 && params.getRangeStart().isAfter(params.getRangeEnd())) {
             throw new BadRequestException("Start date must be before end date",
@@ -294,7 +295,13 @@ public class EventServiceImpl implements EventService, ExistenceValidator<Event>
         );
 
         // Get events from repository
-        Page<Event> page = eventRepository.findPublicEvents(params, pageable);
+        Page<Event> page = eventRepository.findPublicEvents(
+                params.getText(),
+                params.getCategories(),
+                params.getPaid(),
+                params.getRangeStart(),
+                params.getRangeEnd(),
+                pageable);
 
         return page.getContent()
                 .stream()

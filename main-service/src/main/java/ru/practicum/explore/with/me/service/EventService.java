@@ -15,12 +15,10 @@ import java.util.List;
 import java.util.Map;
 
 public interface EventService {
-    @Transactional
     EventFullDto createEvent(long userId, NewEventDto eventDto);
 
     EventFullDto getPrivateEventById(long userId, long eventId);
 
-    @Transactional
     EventFullDto updateEvent(long userId, long eventId, UpdateEventUserRequest updateEvent);
 
     EventFullDto getPublicEventById(long eventId);

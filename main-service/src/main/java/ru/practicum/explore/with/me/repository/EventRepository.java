@@ -7,8 +7,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.practicum.explore.with.me.model.event.Event;
 import ru.practicum.explore.with.me.model.user.User;
-import ru.practicum.explore.with.me.model.event.PublicEventParams;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
@@ -24,15 +25,27 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("""
             SELECT e FROM Event AS e
             WHERE e.state = 'PUBLISHED'
-            AND (:#{#params.text} IS NULL
-            OR LOWER(e.description) LIKE LOWER(CONCAT('%', :#{#params.text}, '%'))
-            OR LOWER(e.annotation) LIKE LOWER(CONCAT('%', :#{#params.text}, '%')))
-            AND (:#{#params.categories} IS NULL OR e.category.id IN (:#{#params.categories}))
-            AND (:#{#params.paid} IS NULL OR e.paid = :#{#params.paid})
-            AND ((coalesce(:#{#params.rangeStart}, :#{#params.rangeEnd}) IS NULL AND e.eventDate > now())
-            OR e.eventDate BETWEEN coalesce(:#{#params.rangeStart}, e.eventDate) AND coalesce(:#{#params.rangeEnd}, e.eventDate))
+              AND (:text IS NULL
+                OR LOWER(e.description) LIKE LOWER(CONCAT('%', :text, '%'))
+                OR LOWER(e.annotation) LIKE LOWER(CONCAT('%', :text, '%')))
+              AND (:categories IS NULL OR e.category.id IN :categories)
+              AND (:paid IS NULL OR e.paid = :paid)
+              AND (
+                  (:rangeStart IS NULL AND :rangeEnd IS NULL AND e.eventDate > CURRENT_TIMESTAMP)
+                  OR
+                  (:rangeStart IS NOT NULL AND :rangeEnd IS NOT NULL AND e.eventDate BETWEEN :rangeStart AND :rangeEnd)
+                  OR
+                  (:rangeStart IS NOT NULL AND :rangeEnd IS NULL AND e.eventDate >= :rangeStart)
+                  OR
+                  (:rangeStart IS NULL AND :rangeEnd IS NOT NULL AND e.eventDate <= :rangeEnd)
+              )
             """)
-    Page<Event> findPublicEvents(@Param("params") PublicEventParams params, Pageable pageable);
+    Page<Event> findPublicEvents(@Param("text") String text,
+                                 @Param("categories") List<Long> categories,
+                                 @Param("paid") Boolean paid,
+                                 @Param("rangeStart") LocalDateTime rangeStart,
+                                 @Param("rangeEnd") LocalDateTime rangeEnd,
+                                 Pageable pageable);
 
 
 }
