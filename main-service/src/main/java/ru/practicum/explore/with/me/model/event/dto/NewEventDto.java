@@ -36,6 +36,8 @@ public class NewEventDto {
     @NotNull
     private Location location;
     private boolean paid = false;
+
+    @PositiveOrZero(message = "The participant limit must be greater than or equal to zero.")
     private int participantLimit = 0;
     private boolean requestModeration = false;
 

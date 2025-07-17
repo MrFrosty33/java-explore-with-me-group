@@ -29,6 +29,8 @@ public class UpdateEventUserRequest {
 
     private Location location;
     private Boolean paid;
+
+    @PositiveOrZero(message = "The participant limit must be greater than or equal to zero.")
     private Integer participantLimit;
     private Boolean requestModeration;
     private UpdateEventUserAction stateAction;
