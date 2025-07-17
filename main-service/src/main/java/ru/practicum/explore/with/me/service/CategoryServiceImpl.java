@@ -12,6 +12,7 @@ import ru.practicum.explore.with.me.mapper.CategoryMapper;
 import ru.practicum.explore.with.me.model.category.Category;
 import ru.practicum.explore.with.me.model.category.CategoryDto;
 import ru.practicum.explore.with.me.model.category.NewCategoryDto;
+import ru.practicum.explore.with.me.model.event.Event;
 import ru.practicum.explore.with.me.repository.CategoryRepository;
 import ru.practicum.explore.with.me.util.DataProvider;
 import ru.practicum.explore.with.me.util.ExistenceValidator;
@@ -57,7 +58,14 @@ public class CategoryServiceImpl implements ExistenceValidator<Category>,
 
     @Override
     public void deleteCategory(long id) {
-        validateExists(id);
+        Category category = categoryRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("The required object was not found.",
+                        "Category with id=" + id + " was not found")
+        );
+        if(!category.getEvents().isEmpty()) {
+            throw new ConflictException("For the requested operation the conditions are not met.",
+                    "The category is not empty");
+        }
         categoryRepository.deleteById(id);
     }
 
