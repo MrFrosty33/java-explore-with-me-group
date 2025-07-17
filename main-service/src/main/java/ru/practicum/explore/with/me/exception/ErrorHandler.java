@@ -3,6 +3,7 @@ package ru.practicum.explore.with.me.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -17,7 +18,7 @@ public class ErrorHandler {
     // писать reason & message точно такие, какие ожидаются в спецификации
     // но может не настолько всё будет жёстко проверяться
 
-    @ExceptionHandler(BadRequestException.class)
+    @ExceptionHandler({MissingServletRequestParameterException.class, BadRequestException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleBadRequest(BadRequestException e) {
         writeLog(e);
