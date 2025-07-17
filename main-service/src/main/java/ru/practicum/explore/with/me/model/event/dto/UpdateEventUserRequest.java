@@ -39,7 +39,10 @@ public class UpdateEventUserRequest {
     private String title;
 
     @AssertTrue(message = "The event must start at least 2 hours from now.")
-    boolean isStartEventValid() {
+    public boolean isStartEventValid() {
+        if (eventDate == null) {
+            return true;
+        }
         return eventDate.isAfter(LocalDateTime.now().plusHours(2));
     }
 }

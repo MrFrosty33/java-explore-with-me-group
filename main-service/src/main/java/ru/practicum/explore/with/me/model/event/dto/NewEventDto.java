@@ -46,7 +46,7 @@ public class NewEventDto {
     private String title;
 
     @AssertTrue(message = "The event must start at least 2 hours from now.")
-    boolean isStartEventValid() {
+    public boolean isStartEventValid() {
         return eventDate.isAfter(LocalDateTime.now().plusHours(2));
     }
 }
