@@ -39,7 +39,7 @@ public class NewEventDto {
 
     @PositiveOrZero(message = "The participant limit must be greater than or equal to zero.")
     private int participantLimit = 0;
-    private boolean requestModeration = false;
+    private boolean requestModeration = true;
 
     @NotBlank
     @Size(min = 3, max = 120, message = "The length of title should be between 3 and 120 symbols")
