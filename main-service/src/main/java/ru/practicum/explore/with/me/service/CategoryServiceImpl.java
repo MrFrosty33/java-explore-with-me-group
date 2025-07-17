@@ -67,6 +67,11 @@ public class CategoryServiceImpl implements ExistenceValidator<Category>,
                 () -> new NotFoundException("The required object was not found.",
                         "Category with id=" + id + " was not found")
         );
+
+        if (categoryToUpdate.getName().equals(categoryDto.getName())) {
+            return categoryMapper.toDto(categoryToUpdate);
+        }
+
         validateNameUnique(categoryDto.getName());
         categoryToUpdate.setName(categoryDto.getName());
         Category category = categoryRepository.save(categoryToUpdate);
