@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.explore.with.me.exception.ConflictException;
 import ru.practicum.explore.with.me.exception.NotFoundException;
 import ru.practicum.explore.with.me.mapper.UserMapper;
 import ru.practicum.explore.with.me.model.user.AdminUserFindParam;
@@ -48,6 +49,7 @@ public class UserServiceImpl implements UserService, ExistenceValidator<User>, D
     @Transactional
     @Override
     public UserDto create(NewUserRequest newUserRequest) {
+        validateEmailUnique(newUserRequest.getEmail());
         UserDto result = mapUserDto(userRepository.save(mapEntity(newUserRequest)));
         log.info("UserServiceImpl: result of create():: {}", result);
         return result;
@@ -79,6 +81,14 @@ public class UserServiceImpl implements UserService, ExistenceValidator<User>, D
             log.info("attempt to find user with id: {}", id);
             throw new NotFoundException("The required object was not found.",
                     "User with id=" + id + " was not found");
+        }
+    }
+
+    private void validateEmailUnique(String email) {
+        if (userRepository.isExistsEmail(email)) {
+            log.info("User with email {} already exists", email);
+            throw new ConflictException("The email of user should be unique.",
+                    "User with email=" + email + " is already exist");
         }
     }
 }
