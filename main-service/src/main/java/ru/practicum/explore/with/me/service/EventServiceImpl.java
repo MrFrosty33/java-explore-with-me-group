@@ -244,7 +244,7 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
     }
 
     public EventFullDto getPublicEventById(long eventId) {
-        Event event = eventRepository.findByIdAndState(eventId, "published")
+        Event event = eventRepository.findByIdAndState(eventId, EventState.PUBLISHED)
                 .orElseThrow(() -> new NotFoundException("The required object was not found.",
                         "Event with id=" + eventId + " was not found"));
 
