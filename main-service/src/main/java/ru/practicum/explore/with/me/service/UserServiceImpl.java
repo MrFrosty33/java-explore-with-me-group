@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService, ExistenceValidator<User>, D
                     .map(this::mapUserDto)
                     .toList();
         } else {
-            PageRequest pageRequest = PageRequest.of(param.getFrom(), param.getFrom());
+            PageRequest pageRequest = PageRequest.of(param.getFrom(), param.getSize());
             result = userRepository.findAll(pageRequest).get()
                     .map(this::mapUserDto)
                     .toList();

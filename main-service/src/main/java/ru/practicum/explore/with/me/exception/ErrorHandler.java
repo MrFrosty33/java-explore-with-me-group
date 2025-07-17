@@ -3,6 +3,8 @@ package ru.practicum.explore.with.me.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -89,6 +91,25 @@ public class ErrorHandler {
         );
         writeLog(e, reason, message);
 
+        return ApiError.builder()
+                .reason(reason)
+                .message(message)
+                .status(HttpStatus.BAD_REQUEST)
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
+        String reason = "Incorrectly made request.";
+        String message = "Validation error. ";
+
+        for (FieldError error : e.getBindingResult().getFieldErrors()) {
+            message = message.concat(error.getField() + ": " + error.getDefaultMessage() + ". ");
+        }
+
+        writeLog(e, reason, message);
         return ApiError.builder()
                 .reason(reason)
                 .message(message)
