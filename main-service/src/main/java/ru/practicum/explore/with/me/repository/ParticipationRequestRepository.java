@@ -20,10 +20,10 @@ public interface ParticipationRequestRepository extends JpaRepository<Participat
     int countByEventId(Long eventId);
 
     @Query("""
-                SELECT e.event.id, COUNT(e)
-                    FROM ParticipationRequest e
-                    WHERE e.event.id IN :eventIds
-                    GROUP BY e.event.id
+                SELECT r.event.id, COUNT(r)
+                    FROM ParticipationRequest r
+                    WHERE r.event.id IN :eventIds
+                    GROUP BY r.event.id
             """)
     Map<Long, Integer> countGroupByEventId(@Param("eventIds") List<Long> eventIds);
 

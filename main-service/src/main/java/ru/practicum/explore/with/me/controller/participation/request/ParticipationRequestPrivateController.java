@@ -48,7 +48,7 @@ public class ParticipationRequestPrivateController {
                                           Long userId,
                                           @RequestParam
                                           @NotNull(message = "must not be null")
-                                          @PositiveOrZero(message = "must be positive")
+                                          @PositiveOrZero(message = "must be positive or zero")
                                           Long eventId) {
         log.trace("{}: create() call with userId: {}, eventId: {}", controllerName, userId, eventId);
 

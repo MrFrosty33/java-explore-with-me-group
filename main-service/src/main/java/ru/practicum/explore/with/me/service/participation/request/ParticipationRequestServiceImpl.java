@@ -54,10 +54,6 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     public ParticipationRequestDto create(NewParticipationRequest newParticipationRequest) {
         Long requesterId = newParticipationRequest.getUserId();
         Long eventId = newParticipationRequest.getEventId();
-        eventExistenceValidator.validateExists(eventId);
-        userExistenceValidator.validateExists(requesterId);
-
-        Event event = eventRepository.findById(eventId).get();
 
         if (participationRequestRepository.existsByRequesterIdAndEventId(
                 requesterId, eventId)) {
@@ -66,6 +62,11 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
             throw new ConflictException("Duplicate request.", "participationRequest with requesterId: " + requesterId +
                     ", and eventId: " + eventId + " already exists");
         }
+
+        eventExistenceValidator.validateExists(eventId);
+        userExistenceValidator.validateExists(requesterId);
+
+        Event event = eventRepository.findById(eventId).get();
 
         if (event.getInitiator().getId().equals(requesterId)) {
             log.info("attempt to create participationRequest by an event initiator with requesterId: {}, eventId: {}, " +
