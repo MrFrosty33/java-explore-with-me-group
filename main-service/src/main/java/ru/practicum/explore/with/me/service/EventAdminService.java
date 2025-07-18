@@ -1,18 +1,25 @@
 package ru.practicum.explore.with.me.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.explore.with.me.exception.*;
+import ru.practicum.explore.with.me.exception.ConflictException;
+import ru.practicum.explore.with.me.exception.NotFoundException;
 import ru.practicum.explore.with.me.mapper.EventMapper;
-import ru.practicum.explore.with.me.model.event.*;
+import ru.practicum.explore.with.me.model.event.AdminEventFilter;
+import ru.practicum.explore.with.me.model.event.Event;
+import ru.practicum.explore.with.me.model.event.EventState;
 import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
 import ru.practicum.explore.with.me.model.event.dto.UpdateEventAdminRequestDto;
-import ru.practicum.explore.with.me.repository.*;
+import ru.practicum.explore.with.me.repository.CategoryRepository;
+import ru.practicum.explore.with.me.repository.EventRepository;
+import ru.practicum.explore.with.me.repository.ParticipationRequestRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +28,8 @@ public class EventAdminService {
     private final EventRepository eventRepo;
     private final CategoryRepository categoryRepo;
     private final EventMapper mapper;
+    private final ParticipationRequestRepository requestRepository;
+    private final EventService eventService;
 
     // GET /admin/events
     @Transactional(readOnly = true)
@@ -42,8 +51,13 @@ public class EventAdminService {
                 f.getRangeEnd(),
                 page
         );
-
-        return events.map(mapper::toFullDto).toList();
+        List<Long> eventIds = events.getContent().stream().map(Event::getId).toList();
+        Map<Long, Integer> confirmedRequests = eventService.getConfirmedRequests(eventIds);
+        return events.map(event -> {
+            EventFullDto dto = mapper.toFullDto(event);
+            dto.setConfirmedRequests(confirmedRequests.getOrDefault(event.getId(), 0));
+            return dto;
+        }).toList();
     }
 
     // PATCH /admin/events/{id}
