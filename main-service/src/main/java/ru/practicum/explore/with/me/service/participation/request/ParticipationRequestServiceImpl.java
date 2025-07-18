@@ -90,7 +90,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         }
 
         ParticipationRequest request = mapEntity(newParticipationRequest);
-        if (event.isRequestModeration()) {
+        if (!event.isRequestModeration()) {
             request.setStatus(ParticipationRequestStatus.CONFIRMED);
         }
 
