@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 public class EventRequestStatusUpdateRequest {
     @NotEmpty(message = "Request IDs must not be empty")
-    private List<@NotNull(message = "Request ID cannot be null")Long> requestIds;
+    private List<@NotNull(message = "Request ID cannot be null") Long> requestIds;
 
     @NotNull(message = "Status must not be null")
     private StatusUpdateRequest status;
