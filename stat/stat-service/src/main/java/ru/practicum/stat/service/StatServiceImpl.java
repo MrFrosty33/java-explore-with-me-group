@@ -15,7 +15,13 @@ public class StatServiceImpl implements StatService {
 
     @Override
     public void saveHit(EndpointHitCreate hitCreate) {
-        statRepository.save(hitCreate);
+        Hit hit = Hit.builder()
+                .app(hitCreate.getApp())
+                .uri(hitCreate.getUri())
+                .ip(hitCreate.getIp())
+                .created(hitCreate.getTimestamp())
+                .build();
+         statRepository.save(hit);
     }
 
     @Override
