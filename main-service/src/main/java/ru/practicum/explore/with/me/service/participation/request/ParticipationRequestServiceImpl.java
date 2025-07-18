@@ -23,6 +23,7 @@ import ru.practicum.explore.with.me.util.ExistenceValidator;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Slf4j
@@ -82,15 +83,20 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
                     "event with id: " + eventId + " is not published yet");
         }
 
-        if (event.getParticipantLimit() <= participationRequestRepository.countByEventId(eventId)) {
-            log.info("attempt to create participationRequest, but participantLimit: {} is reached",
-                    event.getParticipantLimit());
-            throw new ConflictException("Participant limit is reached.", "event with id: " + eventId +
-                    " has participant limit of: " + event.getParticipantLimit());
+        if (event.getParticipantLimit() != 0) {
+            List<ParticipationRequest> alreadyConfirmed = participationRequestRepository
+                    .findAllByEventIdAndStatus(eventId, ParticipationRequestStatus.CONFIRMED);
+            AtomicInteger remainingSpots = new AtomicInteger(event.getParticipantLimit() - alreadyConfirmed.size());
+            if (remainingSpots.get() <= 0) {
+                log.info("attempt to create participationRequest, but participantLimit: {} is reached",
+                        event.getParticipantLimit());
+                throw new ConflictException("Participant limit is reached.", "event with id: " + eventId +
+                        " has participant limit of: " + event.getParticipantLimit());
+            }
         }
 
         ParticipationRequest request = mapEntity(newParticipationRequest);
-        if (!event.isRequestModeration()) {
+        if (!event.isRequestModeration() || event.getParticipantLimit() == 0) {
             request.setStatus(ParticipationRequestStatus.CONFIRMED);
         }
 
