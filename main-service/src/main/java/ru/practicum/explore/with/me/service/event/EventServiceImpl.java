@@ -1,4 +1,4 @@
-package ru.practicum.explore.with.me.service;
+package ru.practicum.explore.with.me.service.event;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,22 +1,22 @@
-package ru.practicum.explore.with.me.controller;
+package ru.practicum.explore.with.me.controller.compilation;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.explore.with.me.model.compilation.CompilationCreateDto;
 import ru.practicum.explore.with.me.model.compilation.CompilationRequestDto;
 import ru.practicum.explore.with.me.model.compilation.CompilationUpdateDto;
-import ru.practicum.explore.with.me.service.CompilationService;
+import ru.practicum.explore.with.me.service.compilation.CompilationService;
 
 @RestController
 @AllArgsConstructor

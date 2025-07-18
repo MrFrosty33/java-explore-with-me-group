@@ -1,4 +1,4 @@
-package ru.practicum.explore.with.me.controller;
+package ru.practicum.explore.with.me.controller.user;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.explore.with.me.model.user.AdminUserFindParam;
 import ru.practicum.explore.with.me.model.user.NewUserRequest;
 import ru.practicum.explore.with.me.model.user.UserDto;
-import ru.practicum.explore.with.me.service.UserService;
+import ru.practicum.explore.with.me.service.user.UserService;
 
 import java.util.List;
 

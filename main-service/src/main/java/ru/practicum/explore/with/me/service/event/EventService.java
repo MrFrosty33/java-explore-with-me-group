@@ -1,4 +1,4 @@
-package ru.practicum.explore.with.me.service;
+package ru.practicum.explore.with.me.service.event;
 
 import ru.practicum.explore.with.me.model.event.PublicEventParam;
 import ru.practicum.explore.with.me.model.event.dto.EventFullDto;

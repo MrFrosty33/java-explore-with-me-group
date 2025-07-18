@@ -1,4 +1,4 @@
-package ru.practicum.explore.with.me.controller;
+package ru.practicum.explore.with.me.controller.participation.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.explore.with.me.model.participation.CancelParticipationRequest;
 import ru.practicum.explore.with.me.model.participation.NewParticipationRequest;
 import ru.practicum.explore.with.me.model.participation.ParticipationRequestDto;
-import ru.practicum.explore.with.me.service.ParticipationRequestService;
+import ru.practicum.explore.with.me.service.participation.request.ParticipationRequestService;
 
 import java.util.List;
 

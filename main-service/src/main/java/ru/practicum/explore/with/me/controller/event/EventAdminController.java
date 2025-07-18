@@ -1,13 +1,20 @@
-package ru.practicum.explore.with.me.controller;
+package ru.practicum.explore.with.me.controller.event;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
-import org.springframework.web.bind.annotation.*;
-import ru.practicum.explore.with.me.model.event.*;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.explore.with.me.model.event.AdminEventFilter;
 import ru.practicum.explore.with.me.model.event.dto.AdminEventSearchRequestDto;
 import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
 import ru.practicum.explore.with.me.model.event.dto.UpdateEventAdminRequestDto;
-import ru.practicum.explore.with.me.service.EventAdminService;
+import ru.practicum.explore.with.me.service.event.EventAdminService;
 
 import java.util.List;
 

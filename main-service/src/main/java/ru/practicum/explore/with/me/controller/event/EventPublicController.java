@@ -1,4 +1,4 @@
-package ru.practicum.explore.with.me.controller;
+package ru.practicum.explore.with.me.controller.event;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
@@ -20,7 +20,7 @@ import ru.practicum.explore.with.me.model.event.EventShortDto;
 import ru.practicum.explore.with.me.model.event.PublicEventParam;
 import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
 import ru.practicum.explore.with.me.model.event.dto.EventShortDto;
-import ru.practicum.explore.with.me.service.EventService;
+import ru.practicum.explore.with.me.service.event.EventService;
 
 import java.time.LocalDateTime;
 import java.util.List;

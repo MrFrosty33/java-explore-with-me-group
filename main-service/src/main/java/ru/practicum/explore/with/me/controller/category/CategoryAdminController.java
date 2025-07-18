@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.explore.with.me.model.category.CategoryDto;
 import ru.practicum.explore.with.me.model.category.NewCategoryDto;
-import ru.practicum.explore.with.me.service.CategoryServiceImpl;
+import ru.practicum.explore.with.me.service.category.CategoryServiceImpl;
 
 @RestController
 @RequestMapping("/admin/categories")
