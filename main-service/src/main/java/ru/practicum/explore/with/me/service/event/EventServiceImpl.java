@@ -18,15 +18,7 @@ import ru.practicum.explore.with.me.model.event.Event;
 import ru.practicum.explore.with.me.model.event.EventPublicSort;
 import ru.practicum.explore.with.me.model.event.EventState;
 import ru.practicum.explore.with.me.model.event.PublicEventParam;
-import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
-import ru.practicum.explore.with.me.model.event.dto.EventRequestStatusUpdateRequest;
-import ru.practicum.explore.with.me.model.event.dto.EventRequestStatusUpdateResult;
-import ru.practicum.explore.with.me.model.event.dto.EventShortDto;
-import ru.practicum.explore.with.me.model.event.dto.EventViewsParameters;
-import ru.practicum.explore.with.me.model.event.dto.NewEventDto;
-import ru.practicum.explore.with.me.model.event.dto.StatusUpdateRequest;
-import ru.practicum.explore.with.me.model.event.dto.UpdateEventUserAction;
-import ru.practicum.explore.with.me.model.event.dto.UpdateEventUserRequest;
+import ru.practicum.explore.with.me.model.event.dto.*;
 import ru.practicum.explore.with.me.model.participation.ParticipationRequest;
 import ru.practicum.explore.with.me.model.participation.ParticipationRequestDto;
 import ru.practicum.explore.with.me.model.participation.ParticipationRequestStatus;
@@ -169,7 +161,7 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
                 .end(LocalDateTime.now())
                 .eventIds(eventIds).unique(true).build();
         Map<Long, Long> viewStats = getEventViews(params);
-        Map<Long, Integer> confirmedRequests = requestRepository.countGroupByEventId(eventIds);
+        Map<Long, Integer> confirmedRequests = getConfirmedRequests(eventIds);
         return events.stream().map(event -> {
             EventShortDto shortDto = eventMapper.toShortDto(event);
             shortDto.setViews(viewStats.getOrDefault(event.getId(), 0L));
@@ -206,15 +198,17 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
                     "The participant limit has been reached");
         }
 
-        List<ParticipationRequestDto> confirmedDto = new ArrayList<>();
-        List<ParticipationRequestDto> rejectedDto = new ArrayList<>();
-
         requestsByEventId.forEach(request -> {
             if (request.getStatus() != ParticipationRequestStatus.PENDING) {
                 throw new ConflictException("For the requested operation the conditions are not met.",
                         "It's not allowed to change the status of the request");
             }
+        });
 
+        List<ParticipationRequestDto> confirmedDto = new ArrayList<>();
+        List<ParticipationRequestDto> rejectedDto = new ArrayList<>();
+
+        requestsByEventId.forEach(request -> {
             if (remainingSpots.get() > 0 && updateRequest.getStatus() == StatusUpdateRequest.CONFIRMED) {
                 request.setStatus(ParticipationRequestStatus.CONFIRMED);
                 confirmedDto.add(requestMapper.toDto(request));
@@ -225,21 +219,24 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
             }
         });
 
-        requestRepository.updateStatus(
-                confirmedDto.stream().map(ParticipationRequestDto::getId).toList(),
-                ParticipationRequestStatus.CONFIRMED);
-
-        requestRepository.updateStatus(
-                confirmedDto.stream().map(ParticipationRequestDto::getId).toList(),
-                ParticipationRequestStatus.REJECTED);
-
+        if (!confirmedDto.isEmpty()) {
+            requestRepository.updateStatus(
+                    confirmedDto.stream().map(ParticipationRequestDto::getId).toList(),
+                    ParticipationRequestStatus.CONFIRMED);
+        }
+        if (!rejectedDto.isEmpty()) {
+            requestRepository.updateStatus(
+                    rejectedDto.stream().map(ParticipationRequestDto::getId).toList(),
+                    ParticipationRequestStatus.REJECTED);
+        }
         if (remainingSpots.get() == 0) {
             List<Long> pendingIds = requestRepository
                     .findAllByEventIdAndStatus(eventId, ParticipationRequestStatus.PENDING)
                     .stream().map(ParticipationRequest::getId).toList();
-            requestRepository.updateStatus(pendingIds, ParticipationRequestStatus.REJECTED);
+            if (!pendingIds.isEmpty()) {
+                requestRepository.updateStatus(pendingIds, ParticipationRequestStatus.REJECTED);
+            }
         }
-
         return new EventRequestStatusUpdateResult(confirmedDto, rejectedDto);
     }
 
@@ -264,6 +261,17 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
             }
         }
         return views;
+    }
+
+    @Override
+    public Map<Long, Integer> getConfirmedRequests(List<Long> eventIds) {
+        List<EventRequestCount> confirmedRequests = requestRepository.countGroupByEventId(eventIds);
+        return confirmedRequests.stream().collect(
+                Collectors.toMap(
+                        EventRequestCount::eventId,
+                        r -> r.count().intValue()
+                )
+        );
     }
 
     private Event getEventIfInitiatedByUser(long userId, long eventId) {

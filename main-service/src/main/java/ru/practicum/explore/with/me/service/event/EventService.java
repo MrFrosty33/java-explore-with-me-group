@@ -32,4 +32,6 @@ public interface EventService {
                                                             EventRequestStatusUpdateRequest updateRequest);
 
     List<EventShortDto> getPublicEvents(PublicEventParam params);
+
+    Map<Long, Integer> getConfirmedRequests(List<Long> eventIds);
 }
