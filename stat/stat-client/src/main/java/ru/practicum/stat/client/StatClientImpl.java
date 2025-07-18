@@ -3,7 +3,6 @@ package ru.practicum.stat.client;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,35 +17,25 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
 public class StatClientImpl implements StatClient {
-    @Value("${stat.server-url}")
-    private final String serverUrl;
     private final RestClient client;
 
-    public RestClient restClient() {
-        return RestClient.builder()
-                .baseUrl(serverUrl)
-                .build();
-    }
-
     public ResponseEntity<Void> createHit(EndpointHitCreate endpointHitCreate) {
-        log.trace("StatClient: createHit() call with endpointHitCreate body: {}", endpointHitCreate);
-
-        String url = serverUrl + "/hit";
+        log.trace("STAT CLIENT: createHit() call with endpointHitCreate body: {}", endpointHitCreate);
 
         ResponseEntity<Void> result = client
                 .post()
-                .uri(url)
+                .uri("/hit")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(endpointHitCreate)
                 .retrieve()
                 .toEntity(Void.class);
 
-        if (!result.getStatusCode().is2xxSuccessful()) {
-            log.info("StatClient: createHit() success with status: {}, body: {}, serverUrl: {}",
-                    result.getStatusCode(), result.getBody(), url);
+        if (result.getStatusCode().is2xxSuccessful()) {
+            log.info("STAT CLIENT: createHit() success with status: {}",
+                    result.getStatusCode());
         } else {
-            log.warn("StatClient: createHit() failure with status: {}, serverUrl: {}",
-                    result.getStatusCode(), url);
+            log.warn("STAT CLIENT: createHit() failure with status: {}",
+                    result.getStatusCode());
         }
 
         return result;
@@ -56,33 +45,32 @@ public class StatClientImpl implements StatClient {
                                                     LocalDateTime end,
                                                     List<String> uris,
                                                     boolean unique) {
-        log.trace("StatClient: getStats() call with params: start={}, end={}, uris={}, unique={}",
+        log.info("STAT CLIENT: getStats() call with params: start={}, end={}, uris={}, unique={}",
                 start, end, uris, unique);
 
         UriComponentsBuilder builder = UriComponentsBuilder
-                .fromHttpUrl(serverUrl + "/stats")
+                .fromPath("/stats")
                 .queryParam("start", start)
                 .queryParam("end", end)
                 .queryParam("unique", unique);
         uris.forEach(uri -> builder.queryParam("uris", uri));
-        String url = builder.toUriString();
+        String path = builder.toUriString();
 
         ResponseEntity<List<ViewStats>> result = client
                 .get()
-                .uri(url)
+                .uri(path)
                 .retrieve()
                 .toEntity(new ParameterizedTypeReference<List<ViewStats>>() {
                 });
 
         if (result.getStatusCode().is2xxSuccessful()) {
-            log.info("StatClient: getStats() success with status: {}, body: {}, serverUrl: {}",
-                    result.getStatusCode(), result.getBody(), url);
+            log.info("STAT CLIENT: getStats() success with status: {}, body: {}",
+                    result.getStatusCode(), result.getBody());
         } else {
-            log.warn("StatClient: getStats() failure with status: {}, body: {}, serverUrl: {}",
-                    result.getStatusCode(), result.getBody(), url);
+            log.info("STAT CLIENT: getStats() failure with status: {}, body: {}",
+                    result.getStatusCode(), result.getBody());
         }
 
         return result;
     }
-
 }

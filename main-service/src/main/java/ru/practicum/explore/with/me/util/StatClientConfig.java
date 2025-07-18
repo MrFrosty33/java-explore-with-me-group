@@ -16,6 +16,6 @@ public class StatClientConfig {
                 .baseUrl(serverUrl)
                 .build();
 
-        return new StatClientImpl(serverUrl, client);
+        return new StatClientImpl(client);
     }
 }
