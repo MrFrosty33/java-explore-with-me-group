@@ -82,7 +82,8 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
                 .build();
         Map<Long, Long> viewStats = getEventViews(statParams);
         eventFullDto.setViews(viewStats.getOrDefault(eventId, 0L));
-        eventFullDto.setConfirmedRequests(requestRepository.countByEventId(eventId));
+        Map<Long, Integer> confirmedRequests = getConfirmedRequests(List.of(eventId));
+        eventFullDto.setConfirmedRequests(confirmedRequests.getOrDefault(eventId, 0));
         return eventFullDto;
     }
 
@@ -144,8 +145,9 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
                 .build();
 
         Map<Long, Long> viewStats = getEventViews(statParams);
+        Map<Long, Integer> confirmedRequests = getConfirmedRequests(List.of(eventId));
         eventFullDto.setViews(viewStats.getOrDefault(eventId, 0L));
-        eventFullDto.setConfirmedRequests(requestRepository.countByEventId(eventId));
+        eventFullDto.setConfirmedRequests(confirmedRequests.getOrDefault(eventId, 0));
         return eventFullDto;
     }
 
@@ -155,6 +157,9 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
                 new NotFoundException("The required object was not found.", "User with id=" + userId + " was not found"));
         Pageable pageable = PageRequest.of(from, count, Sort.by("createdOn").ascending());
         List<Event> events = eventRepository.findEventsByUser(user, pageable).getContent();
+        if (events.isEmpty()) {
+            return List.of();
+        }
         List<Long> eventIds = events.stream().map(Event::getId).toList();
         EventViewsParameters params = EventViewsParameters.builder()
                 .start(events.getFirst().getCreatedOn())
@@ -245,7 +250,16 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
                 .orElseThrow(() -> new NotFoundException("The required object was not found.",
                         "Event with id=" + eventId + " was not found"));
 
-        return eventMapper.toFullDto(event);
+        EventFullDto eventFullDto = eventMapper.toFullDto(event);
+        EventViewsParameters statParams = EventViewsParameters.builder()
+                .start(event.getCreatedOn()).end(LocalDateTime.now())
+                .eventIds(List.of(event.getId())).unique(true)
+                .build();
+        Map<Long, Long> viewStats = getEventViews(statParams);
+        eventFullDto.setViews(viewStats.getOrDefault(eventId, 0L));
+        Map<Long, Integer> confirmedRequests = getConfirmedRequests(List.of(eventId));
+        eventFullDto.setConfirmedRequests(confirmedRequests.getOrDefault(eventId, 0));
+        return eventFullDto;
     }
 
     @Override
@@ -301,7 +315,7 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
                 getSort(params.getSort())
         );
 
-        // Get events from repository
+        // Get events from a repository
         Page<Event> page = eventRepository.findPublicEvents(
                 params.getText(),
                 params.getCategories(),
@@ -310,10 +324,25 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
                 params.getRangeEnd(),
                 pageable);
 
-        return page.getContent()
-                .stream()
-                .map(eventMapper::toShortDto)
-                .collect(Collectors.toList());
+        List<Event> events = page.getContent();
+
+        if (events.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> eventIds = events.stream().map(Event::getId).toList();
+        EventViewsParameters statParams = EventViewsParameters.builder()
+                .start(params.getRangeStart() != null ? params.getRangeStart() : events.getFirst().getCreatedOn())
+                .end(LocalDateTime.now())
+                .eventIds(eventIds).unique(true).build();
+        Map<Long, Long> viewStats = getEventViews(statParams);
+        Map<Long, Integer> confirmedRequests = getConfirmedRequests(eventIds);
+        return events.stream().map(event -> {
+            EventShortDto shortDto = eventMapper.toShortDto(event);
+            shortDto.setViews(viewStats.getOrDefault(event.getId(), 0L));
+            shortDto.setConfirmedRequests(confirmedRequests.getOrDefault(event.getId(), 0));
+            return shortDto;
+        }).toList();
 
     }
 
