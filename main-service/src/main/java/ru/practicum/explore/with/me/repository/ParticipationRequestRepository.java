@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import ru.practicum.explore.with.me.model.event.dto.EventRequestCount;
 import ru.practicum.explore.with.me.model.participation.ParticipationRequest;
 import ru.practicum.explore.with.me.model.participation.ParticipationRequestStatus;
 
@@ -20,12 +21,12 @@ public interface ParticipationRequestRepository extends JpaRepository<Participat
     int countByEventId(Long eventId);
 
     @Query("""
-                SELECT r.event.id, COUNT(r)
+                SELECT new ru.practicum.explore.with.me.model.event.dto.EventRequestCount(r.event.id, COUNT(r))
                     FROM ParticipationRequest r
                     WHERE r.event.id IN :eventIds
                     GROUP BY r.event.id
             """)
-    Map<Long, Integer> countGroupByEventId(@Param("eventIds") List<Long> eventIds);
+    List<EventRequestCount> countGroupByEventId(@Param("eventIds") List<Long> eventIds);
 
     List<ParticipationRequest> findAllByEventId(Long eventId);
 
