@@ -2,12 +2,15 @@ package ru.practicum.explore.with.me.model.compilation;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.practicum.explore.with.me.model.event.Event;
+import ru.practicum.explore.with.me.model.event.dto.EventShortDto;
 
 import java.util.List;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class CompilationRequestDto {
     private Long id;
 
@@ -15,5 +18,5 @@ public class CompilationRequestDto {
 
     private Boolean pinned;
 
-    private List<Event> events;
+    private List<EventShortDto> events;
 }
