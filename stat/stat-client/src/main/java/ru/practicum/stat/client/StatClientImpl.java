@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.stat.dto.EndpointHitCreate;
@@ -18,11 +17,16 @@ import java.util.List;
 
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
-@Service
 public class StatClientImpl implements StatClient {
-    @Value("${stats.server-url}")
-    private String serverUrl;
+    @Value("${stat.server-url}")
+    private final String serverUrl;
     private final RestClient client;
+
+    public RestClient restClient() {
+        return RestClient.builder()
+                .baseUrl(serverUrl)
+                .build();
+    }
 
     public ResponseEntity<Void> createHit(EndpointHitCreate endpointHitCreate) {
         log.trace("StatClient: createHit() call with endpointHitCreate body: {}", endpointHitCreate);
