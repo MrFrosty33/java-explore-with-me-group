@@ -1,17 +1,21 @@
-package ru.practicum.stat.client;
+package ru.practicum.explore.with.me.util;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
+import ru.practicum.stat.client.StatClient;
+import ru.practicum.stat.client.StatClientImpl;
 
 @Configuration
 public class StatClientConfig {
 
     @Bean
-    public RestClient restClient(@Value("${stats.server-url}") String serverUrl) {
-        return RestClient.builder()
+    public StatClient statClient(@Value("${stats.server-url}") String serverUrl) {
+        RestClient client = RestClient.builder()
                 .baseUrl(serverUrl)
                 .build();
+
+        return new StatClientImpl(serverUrl, client);
     }
 }
