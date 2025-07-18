@@ -32,7 +32,7 @@ import java.util.List;
 @Validated
 public class UserAdminController {
     private final UserService service;
-    private final String controllerName = "UserAdminController";
+    private final String controllerName = this.getClass().getSimpleName();
 
     @GetMapping
     public List<UserDto> find(@RequestParam(required = false)

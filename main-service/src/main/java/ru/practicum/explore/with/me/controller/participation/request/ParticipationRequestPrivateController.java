@@ -29,7 +29,7 @@ import java.util.List;
 @Validated
 public class ParticipationRequestPrivateController {
     private final ParticipationRequestService service;
-    private final String controllerName = "ParticipationRequestPrivateController";
+    private final String controllerName = this.getClass().getSimpleName();
 
     @GetMapping
     public List<ParticipationRequestDto> find(@PathVariable
