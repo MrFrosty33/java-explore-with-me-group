@@ -49,7 +49,7 @@ public class EventPrivateController {
     public EventFullDto getEventById(@PathVariable @PositiveOrZero @NotNull Long userId,
                                      @PathVariable @PositiveOrZero @NotNull Long eventId) {
         log.info("Get event {}", eventId);
-        return eventsService.getEventById(userId, eventId);
+        return eventsService.getPrivateEventById(userId, eventId);
     }
 
     @PatchMapping("/{eventId}")

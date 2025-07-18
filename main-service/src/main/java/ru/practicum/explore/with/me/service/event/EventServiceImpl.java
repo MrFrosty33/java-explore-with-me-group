@@ -13,7 +13,6 @@ import ru.practicum.explore.with.me.exception.ConflictException;
 import ru.practicum.explore.with.me.exception.NotFoundException;
 import ru.practicum.explore.with.me.mapper.EventMapper;
 import ru.practicum.explore.with.me.mapper.ParticipationRequestMapper;
-import ru.practicum.explore.with.me.model.user.User;
 import ru.practicum.explore.with.me.model.category.Category;
 import ru.practicum.explore.with.me.model.event.Event;
 import ru.practicum.explore.with.me.model.event.EventPublicSort;
@@ -60,7 +59,6 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
     private final ParticipationRequestRepository requestRepository;
     private final ParticipationRequestMapper requestMapper;
 
-    @Transactional
     @Override
     @Transactional
     public EventFullDto createEvent(long userId, NewEventDto eventDto) {
