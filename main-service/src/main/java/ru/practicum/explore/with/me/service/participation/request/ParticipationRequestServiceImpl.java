@@ -114,17 +114,17 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
                         new NotFoundException("The required object was not found.",
                                 "ParticipationRequest with id=" + cancelParticipationRequest.getRequestId() +
                                         " was not found"));
+        userExistenceValidator.validateExists(cancelParticipationRequest.getUserId());
         if (!request.getRequester().getId().equals(cancelParticipationRequest.getUserId())) {
             log.info("ParticipationRequestServiceImpl: attempt to cancel participationRequest by not an owner");
             throw new ConflictException("Request can be cancelled only by an owner",
                     "User with id=" + cancelParticipationRequest.getUserId() +
                             " is not an owner of request with id=" + cancelParticipationRequest.getRequestId());
         }
-        userExistenceValidator.validateExists(cancelParticipationRequest.getUserId());
-
 
         ParticipationRequestDto result = participationRequestMapper.toDto(
                 participationRequestRepository.findById(cancelParticipationRequest.getRequestId()).get());
+        result.setStatus(ParticipationRequestStatus.CANCELED);
         participationRequestRepository.deleteById(cancelParticipationRequest.getRequestId());
 
         log.info("ParticipationRequestServiceImpl: result of cancel(): {}, which has been deleted", result);
