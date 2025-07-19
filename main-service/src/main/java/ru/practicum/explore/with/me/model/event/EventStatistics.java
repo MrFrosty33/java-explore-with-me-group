@@ -1,12 +1,14 @@
 package ru.practicum.explore.with.me.model.event;
 
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 
 import java.util.Map;
 
 @Getter
 @AllArgsConstructor
+@Data
 public class EventStatistics {
     private final Map<Long, Long> views;
     private final Map<Long, Integer> confirmedRequests;
