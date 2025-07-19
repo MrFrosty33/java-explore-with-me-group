@@ -1,15 +1,20 @@
 package ru.practicum.explore.with.me.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.explore.with.me.exception.*;
+import ru.practicum.explore.with.me.exception.ConflictException;
+import ru.practicum.explore.with.me.exception.NotFoundException;
 import ru.practicum.explore.with.me.mapper.EventMapper;
-import ru.practicum.explore.with.me.model.event.*;
+import ru.practicum.explore.with.me.model.event.AdminEventFilter;
+import ru.practicum.explore.with.me.model.event.Event;
+import ru.practicum.explore.with.me.model.event.EventState;
 import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
 import ru.practicum.explore.with.me.model.event.dto.UpdateEventAdminRequestDto;
-import ru.practicum.explore.with.me.repository.*;
+import ru.practicum.explore.with.me.repository.CategoryRepository;
+import ru.practicum.explore.with.me.repository.EventRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;

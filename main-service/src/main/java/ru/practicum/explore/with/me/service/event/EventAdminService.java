@@ -60,7 +60,7 @@ public class EventAdminService {
         LocalDateTime endStats = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         EventStatistics stats = eventService.getEventStatistics(eventList, startStats, endStats);
         return events.stream()
-                .map(event -> mapper.toFullDtoWithStats(event,stats))
+                .map(event -> mapper.toFullDtoWithStats(event, stats))
                 .toList();
     }
 

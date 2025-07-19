@@ -32,7 +32,7 @@ public interface EventMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "category", ignore = true)
-    void updateFromAdmin(UpdateEventAdminRequestDto dto,
+    void updateFromAdmin(UpdateEventAdminRequestDto dto, @MappingTarget Event event);
 
     default EventFullDto toFullDtoWithStats(Event event, EventStatistics stats) {
         EventFullDto dto = toFullDto(event);

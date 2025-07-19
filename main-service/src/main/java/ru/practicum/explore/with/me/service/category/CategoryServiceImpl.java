@@ -61,7 +61,7 @@ public class CategoryServiceImpl implements ExistenceValidator<Category>,
                 () -> new NotFoundException("The required object was not found.",
                         "Category with id=" + id + " was not found")
         );
-        if(!category.getEvents().isEmpty()) {
+        if (!category.getEvents().isEmpty()) {
             throw new ConflictException("For the requested operation the conditions are not met.",
                     "The category is not empty");
         }
