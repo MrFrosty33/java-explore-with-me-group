@@ -1,4 +1,4 @@
-package ru.practicum.explore.with.me.service;
+package ru.practicum.explore.with.me.service.user;
 
 import ru.practicum.explore.with.me.model.user.AdminUserFindParam;
 import ru.practicum.explore.with.me.model.user.NewUserRequest;

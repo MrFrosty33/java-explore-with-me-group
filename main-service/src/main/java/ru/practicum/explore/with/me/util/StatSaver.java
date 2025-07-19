@@ -27,13 +27,13 @@ public class StatSaver {
                 .uri(request.getRequestURI())
                 .timestamp(LocalDateTime.now())
                 .build();
-
-        log.trace("{}: saving stats with endpoint: {}", controllerName, hitCreate.getUri());
+        System.out.println(hitCreate);
+        log.info("STAT SAVER: {} saving stats with endpoint: {}", controllerName, hitCreate.getUri());
         ResponseEntity<Void> statResult = statClient.createHit(hitCreate);
-        if (!statResult.getStatusCode().is2xxSuccessful()) {
-            log.trace("{}: stats saved successfully", controllerName);
+        if (statResult.getStatusCode().is2xxSuccessful()) {
+            log.info("STAT SAVER: {} stats saved successfully", controllerName);
         } else {
-            log.trace("{}: error acquired when saving stats", controllerName);
+            log.info("STAT SAVER: {} error acquired when saving stats", controllerName);
         }
     }
 }

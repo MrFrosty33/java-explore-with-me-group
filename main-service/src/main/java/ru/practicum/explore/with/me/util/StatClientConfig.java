@@ -11,11 +11,11 @@ import ru.practicum.stat.client.StatClientImpl;
 public class StatClientConfig {
 
     @Bean
-    public StatClient statClient(@Value("${stats.server-url}") String serverUrl) {
+    public StatClient statClient(@Value("${stat.server-url}") String serverUrl) {
         RestClient client = RestClient.builder()
                 .baseUrl(serverUrl)
                 .build();
 
-        return new StatClientImpl(serverUrl, client);
+        return new StatClientImpl(client);
     }
 }

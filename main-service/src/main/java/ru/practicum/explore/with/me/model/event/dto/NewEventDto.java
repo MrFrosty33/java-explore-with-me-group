@@ -36,15 +36,17 @@ public class NewEventDto {
     @NotNull
     private Location location;
     private boolean paid = false;
+
+    @PositiveOrZero(message = "The participant limit must be greater than or equal to zero.")
     private int participantLimit = 0;
-    private boolean requestModeration = false;
+    private boolean requestModeration = true;
 
     @NotBlank
     @Size(min = 3, max = 120, message = "The length of title should be between 3 and 120 symbols")
     private String title;
 
     @AssertTrue(message = "The event must start at least 2 hours from now.")
-    boolean isStartEventValid() {
+    public boolean isStartEventValid() {
         return eventDate.isAfter(LocalDateTime.now().plusHours(2));
     }
 }

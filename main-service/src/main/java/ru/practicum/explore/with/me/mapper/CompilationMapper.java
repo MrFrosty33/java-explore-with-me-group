@@ -9,11 +9,12 @@ import ru.practicum.explore.with.me.model.event.Event;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {EventMapper.class})
 public interface CompilationMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "events", source = "events")
     Compilation toEntity(CompilationCreateDto compilationCreateDto, List<Event> events);
 
+    @Mapping(target = "events", source = "events")
     CompilationRequestDto toRequestDto(Compilation compilation);
 }

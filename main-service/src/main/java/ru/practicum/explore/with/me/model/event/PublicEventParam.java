@@ -1,5 +1,6 @@
 package ru.practicum.explore.with.me.model.event;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,6 +9,7 @@ import java.util.List;
 
 @Setter
 @Getter
+@Data
 public class PublicEventParam {
     private String text;
     private List<Long> categories;

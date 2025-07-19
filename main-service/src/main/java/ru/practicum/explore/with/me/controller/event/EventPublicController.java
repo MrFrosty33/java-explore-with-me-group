@@ -1,8 +1,8 @@
-package ru.practicum.explore.with.me.controller;
+package ru.practicum.explore.with.me.controller.event;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -18,10 +18,12 @@ import ru.practicum.explore.with.me.model.event.EventPublicSort;
 import ru.practicum.explore.with.me.model.event.PublicEventParam;
 import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
 import ru.practicum.explore.with.me.model.event.dto.EventShortDto;
-import ru.practicum.explore.with.me.service.EventService;
+import ru.practicum.explore.with.me.service.event.EventService;
+import ru.practicum.explore.with.me.util.StatSaver;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/events")
@@ -30,6 +32,8 @@ import java.util.List;
 @Validated
 public class EventPublicController {
     private final EventService eventsService;
+    private final StatSaver statSaver;
+    private final String controllerName = this.getClass().getSimpleName();
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
@@ -43,9 +47,10 @@ public class EventPublicController {
                                          @RequestParam(defaultValue = "0") int from,
                                          @RequestParam(defaultValue = "10") int size,
                                          HttpServletRequest request) {
+        statSaver.save(request, controllerName);
 
         PublicEventParam publicEventParam = new PublicEventParam();
-        publicEventParam.setText(text);
+        publicEventParam.setText(Objects.requireNonNullElse(text, ""));
         publicEventParam.setCategories(categories);
         publicEventParam.setPaid(paid);
         publicEventParam.setRangeStart(rangeStart);
@@ -61,10 +66,10 @@ public class EventPublicController {
 
     @GetMapping("/{eventId}")
     @ResponseStatus(HttpStatus.OK)
-    public EventFullDto getEventById(@PathVariable @Positive @NotNull Long eventId) {
-
+    public EventFullDto getEventById(@PathVariable @PositiveOrZero @NotNull Long eventId,
+                                     HttpServletRequest request) {
+        statSaver.save(request, controllerName);
         log.info("Get public event {}", eventId);
         return eventsService.getPublicEventById(eventId);
-
     }
 }

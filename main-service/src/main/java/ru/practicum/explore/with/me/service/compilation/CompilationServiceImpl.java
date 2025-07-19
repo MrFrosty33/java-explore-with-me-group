@@ -1,4 +1,4 @@
-package ru.practicum.explore.with.me.service;
+package ru.practicum.explore.with.me.service.compilation;
 
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;

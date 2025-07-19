@@ -1,4 +1,4 @@
-package ru.practicum.explore.with.me.controller;
+package ru.practicum.explore.with.me.controller.event;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -24,7 +24,7 @@ import ru.practicum.explore.with.me.model.event.dto.EventShortDto;
 import ru.practicum.explore.with.me.model.event.dto.NewEventDto;
 import ru.practicum.explore.with.me.model.event.dto.UpdateEventUserRequest;
 import ru.practicum.explore.with.me.model.participation.ParticipationRequestDto;
-import ru.practicum.explore.with.me.service.EventService;
+import ru.practicum.explore.with.me.service.event.EventService;
 
 import java.util.List;
 
@@ -48,7 +48,7 @@ public class EventPrivateController {
     @ResponseStatus(HttpStatus.OK)
     public EventFullDto getEventById(@PathVariable @PositiveOrZero @NotNull Long userId,
                                      @PathVariable @PositiveOrZero @NotNull Long eventId) {
-        log.info("Get event (private scope) {}", eventId);
+        log.info("Get event {}", eventId);
         return eventsService.getPrivateEventById(userId, eventId);
     }
 

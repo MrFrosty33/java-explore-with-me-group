@@ -1,4 +1,4 @@
-package ru.practicum.explore.with.me.service;
+package ru.practicum.explore.with.me.service.category;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +57,14 @@ public class CategoryServiceImpl implements ExistenceValidator<Category>,
 
     @Override
     public void deleteCategory(long id) {
-        validateExists(id);
+        Category category = categoryRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("The required object was not found.",
+                        "Category with id=" + id + " was not found")
+        );
+        if (!category.getEvents().isEmpty()) {
+            throw new ConflictException("For the requested operation the conditions are not met.",
+                    "The category is not empty");
+        }
         categoryRepository.deleteById(id);
     }
 
@@ -67,6 +74,11 @@ public class CategoryServiceImpl implements ExistenceValidator<Category>,
                 () -> new NotFoundException("The required object was not found.",
                         "Category with id=" + id + " was not found")
         );
+
+        if (categoryToUpdate.getName().equals(categoryDto.getName())) {
+            return categoryMapper.toDto(categoryToUpdate);
+        }
+
         validateNameUnique(categoryDto.getName());
         categoryToUpdate.setName(categoryDto.getName());
         Category category = categoryRepository.save(categoryToUpdate);

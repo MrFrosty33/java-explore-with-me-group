@@ -32,7 +32,7 @@ public class StatController {
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
     public void createHit(@Valid @RequestBody EndpointHitCreate hitCreate) {
-        log.info("Create hit: {}", hitCreate);
+        log.info("STAT CONTROLLER: Create hit: {}", hitCreate);
         statService.saveHit(hitCreate);
     }
 
@@ -47,7 +47,7 @@ public class StatController {
                                         LocalDateTime end,
                                     @RequestParam(required = false) List<String> uris,
                                     @RequestParam(defaultValue = "false") boolean unique) {
-        log.info("Get stats: {}, {}, {}, {}", start, end, uris, unique);
+        log.info("STAT CONTROLLER: Get stats: {}, {}, {}, {}", start, end, uris, unique);
         if (end.isBefore(start)) {
             throw new StatValidationException("Start date must be before end date");
         }

@@ -21,25 +21,22 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     Page<Event> findEventsByUser(@Param("user") User user,
                                  Pageable pageable);
 
-    Optional<Event> findByIdAndState(Long id, String state);
+    Optional<Event> findByIdAndState(Long id, EventState state);
 
     @Query("""
             SELECT e FROM Event AS e
-            WHERE e.state = 'PUBLISHED'
+            WHERE e.state = 'published'
               AND (:text IS NULL
                 OR LOWER(e.description) LIKE LOWER(CONCAT('%', :text, '%'))
-                OR LOWER(e.annotation) LIKE LOWER(CONCAT('%', :text, '%')))
+                OR LOWER(e.annotation) LIKE LOWER(CONCAT('%', :text, '%'))
+                OR LOWER(e.title) LIKE LOWER(CONCAT('%', :text, '%')))
               AND (:categories IS NULL OR e.category.id IN :categories)
               AND (:paid IS NULL OR e.paid = :paid)
+              AND (CAST(:rangeStart AS DATE) IS NULL OR e.eventDate >= :rangeStart)
+              AND (CAST(:rangeEnd AS DATE) IS NULL OR e.eventDate <= :rangeEnd)
               AND (
-                  (:rangeStart IS NULL AND :rangeEnd IS NULL AND e.eventDate > CURRENT_TIMESTAMP)
-                  OR
-                  (:rangeStart IS NOT NULL AND :rangeEnd IS NOT NULL AND e.eventDate BETWEEN :rangeStart AND :rangeEnd)
-                  OR
-                  (:rangeStart IS NOT NULL AND :rangeEnd IS NULL AND e.eventDate >= :rangeStart)
-                  OR
-                  (:rangeStart IS NULL AND :rangeEnd IS NOT NULL AND e.eventDate <= :rangeEnd)
-              )
+                CAST(:rangeStart AS DATE) IS NOT NULL OR CAST(:rangeEnd AS DATE) IS NOT NULL OR e.eventDate > CURRENT_TIMESTAMP
+                OR CAST(:rangeStart AS DATE) IS NULL)
             """)
     Page<Event> findPublicEvents(@Param("text") String text,
                                  @Param("categories") List<Long> categories,
@@ -49,18 +46,18 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                                  Pageable pageable);
 
     @Query("""
-            SELECT e
-            FROM Event e
-            WHERE (:users      IS NULL OR e.initiator.id IN :users)
-              AND (:states     IS NULL OR e.state IN :states)
-              AND (:categories IS NULL OR e.category.id IN :categories)
-              AND (e.eventDate >= COALESCE(:rangeStart, e.eventDate))
-              AND (e.eventDate <= COALESCE(:rangeEnd, e.eventDate))
-           """)
+             SELECT e
+             FROM Event e
+             WHERE (:users      IS NULL OR e.initiator.id IN :users)
+               AND (:states     IS NULL OR e.state IN :states)
+               AND (:categories IS NULL OR e.category.id IN :categories)
+               AND (e.eventDate >= COALESCE(:rangeStart, e.eventDate))
+               AND (e.eventDate <= COALESCE(:rangeEnd, e.eventDate))
+            """)
     Page<Event> searchForAdmin(@Param("users") List<Long> users,
-                               @Param("states")     List<EventState> states,
+                               @Param("states") List<EventState> states,
                                @Param("categories") List<Long> categories,
                                @Param("rangeStart") LocalDateTime rangeStart,
-                               @Param("rangeEnd")   LocalDateTime rangeEnd,
+                               @Param("rangeEnd") LocalDateTime rangeEnd,
                                Pageable pageable);
 }
