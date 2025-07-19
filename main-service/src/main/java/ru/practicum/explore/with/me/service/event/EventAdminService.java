@@ -1,17 +1,24 @@
-package ru.practicum.explore.with.me.service;
+package ru.practicum.explore.with.me.service.event;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.explore.with.me.exception.*;
+import ru.practicum.explore.with.me.exception.ConflictException;
+import ru.practicum.explore.with.me.exception.NotFoundException;
 import ru.practicum.explore.with.me.mapper.EventMapper;
-import ru.practicum.explore.with.me.model.event.*;
+import ru.practicum.explore.with.me.model.event.AdminEventFilter;
+import ru.practicum.explore.with.me.model.event.Event;
+import ru.practicum.explore.with.me.model.event.EventState;
+import ru.practicum.explore.with.me.model.event.EventStatistics;
 import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
 import ru.practicum.explore.with.me.model.event.dto.UpdateEventAdminRequestDto;
-import ru.practicum.explore.with.me.repository.*;
+import ru.practicum.explore.with.me.repository.CategoryRepository;
+import ru.practicum.explore.with.me.repository.EventRepository;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -21,6 +28,7 @@ public class EventAdminService {
     private final EventRepository eventRepo;
     private final CategoryRepository categoryRepo;
     private final EventMapper mapper;
+    private final EventService eventService;
 
     // GET /admin/events
     @Transactional(readOnly = true)
@@ -43,7 +51,17 @@ public class EventAdminService {
                 page
         );
 
-        return events.map(mapper::toFullDto).toList();
+        List<Event> eventList = events.getContent();
+        if (eventList.isEmpty()) {
+            return List.of();
+        }
+
+        LocalDateTime startStats = eventList.getFirst().getCreatedOn().truncatedTo(ChronoUnit.SECONDS);
+        LocalDateTime endStats = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        EventStatistics stats = eventService.getEventStatistics(eventList, startStats, endStats);
+        return events.stream()
+                .map(event -> mapper.toFullDtoWithStats(event, stats))
+                .toList();
     }
 
     // PATCH /admin/events/{id}

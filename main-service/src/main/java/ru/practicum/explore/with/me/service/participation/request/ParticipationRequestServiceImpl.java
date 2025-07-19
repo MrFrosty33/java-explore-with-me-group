@@ -1,4 +1,4 @@
-package ru.practicum.explore.with.me.service;
+package ru.practicum.explore.with.me.service.participation.request;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +23,7 @@ import ru.practicum.explore.with.me.util.ExistenceValidator;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Slf4j
@@ -54,10 +55,6 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     public ParticipationRequestDto create(NewParticipationRequest newParticipationRequest) {
         Long requesterId = newParticipationRequest.getUserId();
         Long eventId = newParticipationRequest.getEventId();
-        eventExistenceValidator.validateExists(eventId);
-        userExistenceValidator.validateExists(requesterId);
-
-        Event event = eventRepository.findById(eventId).get();
 
         if (participationRequestRepository.existsByRequesterIdAndEventId(
                 requesterId, eventId)) {
@@ -66,6 +63,11 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
             throw new ConflictException("Duplicate request.", "participationRequest with requesterId: " + requesterId +
                     ", and eventId: " + eventId + " already exists");
         }
+
+        eventExistenceValidator.validateExists(eventId);
+        userExistenceValidator.validateExists(requesterId);
+
+        Event event = eventRepository.findById(eventId).get();
 
         if (event.getInitiator().getId().equals(requesterId)) {
             log.info("attempt to create participationRequest by an event initiator with requesterId: {}, eventId: {}, " +
@@ -81,15 +83,20 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
                     "event with id: " + eventId + " is not published yet");
         }
 
-        if (event.getParticipantLimit() <= participationRequestRepository.countByEventId(eventId)) {
-            log.info("attempt to create participationRequest, but participantLimit: {} is reached",
-                    event.getParticipantLimit());
-            throw new ConflictException("Participant limit is reached.", "event with id: " + eventId +
-                    " has participant limit of: " + event.getParticipantLimit());
+        if (event.getParticipantLimit() != 0) {
+            List<ParticipationRequest> alreadyConfirmed = participationRequestRepository
+                    .findAllByEventIdAndStatus(eventId, ParticipationRequestStatus.CONFIRMED);
+            AtomicInteger remainingSpots = new AtomicInteger(event.getParticipantLimit() - alreadyConfirmed.size());
+            if (remainingSpots.get() <= 0) {
+                log.info("attempt to create participationRequest, but participantLimit: {} is reached",
+                        event.getParticipantLimit());
+                throw new ConflictException("Participant limit is reached.", "event with id: " + eventId +
+                        " has participant limit of: " + event.getParticipantLimit());
+            }
         }
 
         ParticipationRequest request = mapEntity(newParticipationRequest);
-        if (event.isRequestModeration()) {
+        if (!event.isRequestModeration() || event.getParticipantLimit() == 0) {
             request.setStatus(ParticipationRequestStatus.CONFIRMED);
         }
 
@@ -107,17 +114,17 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
                         new NotFoundException("The required object was not found.",
                                 "ParticipationRequest with id=" + cancelParticipationRequest.getRequestId() +
                                         " was not found"));
+        userExistenceValidator.validateExists(cancelParticipationRequest.getUserId());
         if (!request.getRequester().getId().equals(cancelParticipationRequest.getUserId())) {
             log.info("ParticipationRequestServiceImpl: attempt to cancel participationRequest by not an owner");
             throw new ConflictException("Request can be cancelled only by an owner",
                     "User with id=" + cancelParticipationRequest.getUserId() +
                             " is not an owner of request with id=" + cancelParticipationRequest.getRequestId());
         }
-        userExistenceValidator.validateExists(cancelParticipationRequest.getUserId());
-
 
         ParticipationRequestDto result = participationRequestMapper.toDto(
                 participationRequestRepository.findById(cancelParticipationRequest.getRequestId()).get());
+        result.setStatus(ParticipationRequestStatus.CANCELED);
         participationRequestRepository.deleteById(cancelParticipationRequest.getRequestId());
 
         log.info("ParticipationRequestServiceImpl: result of cancel(): {}, which has been deleted", result);
