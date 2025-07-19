@@ -9,7 +9,6 @@ import ru.practicum.explore.with.me.model.participation.ParticipationRequest;
 import ru.practicum.explore.with.me.model.participation.ParticipationRequestStatus;
 
 import java.util.List;
-import java.util.Map;
 
 public interface ParticipationRequestRepository extends JpaRepository<ParticipationRequest, Long> {
 

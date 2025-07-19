@@ -240,6 +240,7 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<EventShortDto> getPublicEvents(PublicEventParam params) {
         if (params.getRangeStart() != null && params.getRangeEnd() != null
                 && params.getRangeStart().isAfter(params.getRangeEnd())) {
@@ -261,7 +262,6 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
                 params.getRangeStart(),
                 params.getRangeEnd(),
                 pageable);
-        System.out.println("PAGE: " + page.getContent().size() + " TOTAL: " + page.getTotalElements());
 
         List<Event> events = page.getContent();
 

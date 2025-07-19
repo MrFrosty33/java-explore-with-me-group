@@ -2,7 +2,7 @@ package ru.practicum.explore.with.me.controller.event;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -65,7 +65,7 @@ public class EventPublicController {
 
     @GetMapping("/{eventId}")
     @ResponseStatus(HttpStatus.OK)
-    public EventFullDto getEventById(@PathVariable @Positive @NotNull Long eventId,
+    public EventFullDto getEventById(@PathVariable @PositiveOrZero @NotNull Long eventId,
                                      HttpServletRequest request) {
         statSaver.save(request, controllerName);
         log.info("Get public event {}", eventId);
