@@ -11,11 +11,6 @@ import ru.practicum.explore.with.me.model.event.EventState;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import ru.practicum.explore.with.me.model.event.EventState;
-import ru.practicum.explore.with.me.model.user.User;
-
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
