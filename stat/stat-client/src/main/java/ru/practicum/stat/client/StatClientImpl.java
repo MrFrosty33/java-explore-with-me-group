@@ -3,6 +3,7 @@ package ru.practicum.stat.client;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,8 @@ import java.util.List;
 @Slf4j
 public class StatClientImpl implements StatClient {
     private final RestClient client;
+    @Value("${stat.server-url}")
+    private String serverUrl;
 
     public ResponseEntity<Void> createHit(EndpointHitCreate endpointHitCreate) {
         log.trace("STAT CLIENT: createHit() call with endpointHitCreate body: {}", endpointHitCreate);
@@ -49,12 +52,14 @@ public class StatClientImpl implements StatClient {
                 start, end, uris, unique);
 
         UriComponentsBuilder builder = UriComponentsBuilder
-                .fromPath("/stats")
+                .fromUriString(serverUrl + "/stats")
                 .queryParam("start", start)
                 .queryParam("end", end)
                 .queryParam("unique", unique);
         uris.forEach(uri -> builder.queryParam("uris", uri));
         String path = builder.toUriString();
+
+        log.info("STAT CLIENT: final Uri : {}", path);
 
         ResponseEntity<List<ViewStats>> result = client
                 .get()
