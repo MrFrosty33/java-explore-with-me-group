@@ -11,15 +11,15 @@ import ru.practicum.explore.with.me.mapper.EventMapper;
 import ru.practicum.explore.with.me.model.event.AdminEventFilter;
 import ru.practicum.explore.with.me.model.event.Event;
 import ru.practicum.explore.with.me.model.event.EventState;
+import ru.practicum.explore.with.me.model.event.EventStatistics;
 import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
-import ru.practicum.explore.with.me.model.event.dto.EventViewsParameters;
 import ru.practicum.explore.with.me.model.event.dto.UpdateEventAdminRequestDto;
 import ru.practicum.explore.with.me.repository.CategoryRepository;
 import ru.practicum.explore.with.me.repository.EventRepository;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -56,19 +56,12 @@ public class EventAdminService {
             return List.of();
         }
 
-        List<Long> eventIds = events.stream().map(Event::getId).toList();
-        EventViewsParameters params = EventViewsParameters.builder()
-                .start(eventList.getFirst().getCreatedOn())
-                .end(LocalDateTime.now())
-                .eventIds(eventIds).unique(true).build();
-        Map<Long, Long> viewStats = eventService.getEventViews(params);
-        Map<Long, Integer> confirmedRequests = eventService.getConfirmedRequests(eventIds);
-        return events.stream().map(event -> {
-            EventFullDto shortDto = mapper.toFullDto(event);
-            shortDto.setViews(viewStats.getOrDefault(event.getId(), 0L));
-            shortDto.setConfirmedRequests(confirmedRequests.getOrDefault(event.getId(), 0));
-            return shortDto;
-        }).toList();
+        LocalDateTime startStats = eventList.getFirst().getCreatedOn().truncatedTo(ChronoUnit.SECONDS);
+        LocalDateTime endStats = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        EventStatistics stats = eventService.getEventStatistics(eventList, startStats, endStats);
+        return events.stream()
+                .map(event -> mapper.toFullDtoWithStats(event,stats))
+                .toList();
     }
 
     // PATCH /admin/events/{id}

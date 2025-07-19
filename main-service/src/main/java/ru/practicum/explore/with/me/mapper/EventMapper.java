@@ -6,6 +6,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import ru.practicum.explore.with.me.model.event.Event;
+import ru.practicum.explore.with.me.model.event.EventStatistics;
 import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
 import ru.practicum.explore.with.me.model.event.dto.EventShortDto;
 import ru.practicum.explore.with.me.model.event.dto.NewEventDto;
@@ -33,4 +34,18 @@ public interface EventMapper {
     @Mapping(target = "category", ignore = true)
     void updateFromAdmin(UpdateEventAdminRequestDto dto,
                          @MappingTarget Event entity);
+
+    default EventFullDto toFullDtoWithStats(Event event, EventStatistics stats) {
+        EventFullDto dto = toFullDto(event);
+        dto.setViews(stats.getViews(event.getId()));
+        dto.setConfirmedRequests(stats.getConfirmedRequests(event.getId()));
+        return dto;
+    }
+
+    default EventShortDto toShortDtoWithStats(Event event, EventStatistics stats) {
+        EventShortDto dto = toShortDto(event);
+        dto.setViews(stats.getViews(event.getId()));
+        dto.setConfirmedRequests(stats.getConfirmedRequests(event.getId()));
+        return dto;
+    }
 }

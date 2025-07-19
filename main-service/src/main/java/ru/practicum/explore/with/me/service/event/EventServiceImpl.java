@@ -17,6 +17,7 @@ import ru.practicum.explore.with.me.model.category.Category;
 import ru.practicum.explore.with.me.model.event.Event;
 import ru.practicum.explore.with.me.model.event.EventPublicSort;
 import ru.practicum.explore.with.me.model.event.EventState;
+import ru.practicum.explore.with.me.model.event.EventStatistics;
 import ru.practicum.explore.with.me.model.event.PublicEventParam;
 import ru.practicum.explore.with.me.model.event.dto.*;
 import ru.practicum.explore.with.me.model.participation.ParticipationRequest;
@@ -32,6 +33,7 @@ import ru.practicum.explore.with.me.util.StatsGetter;
 import ru.practicum.stat.dto.ViewStats;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -74,17 +76,11 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
     @Override
     public EventFullDto getPrivateEventById(long userId, long eventId) {
         Event event = getEventIfInitiatedByUser(userId, eventId);
-        EventFullDto eventFullDto = eventMapper.toFullDto(event);
-
-        EventViewsParameters statParams = EventViewsParameters.builder()
-                .start(event.getCreatedOn()).end(LocalDateTime.now())
-                .eventIds(List.of(event.getId())).unique(true)
-                .build();
-        Map<Long, Long> viewStats = getEventViews(statParams);
-        eventFullDto.setViews(viewStats.getOrDefault(eventId, 0L));
-        Map<Long, Integer> confirmedRequests = getConfirmedRequests(List.of(eventId));
-        eventFullDto.setConfirmedRequests(confirmedRequests.getOrDefault(eventId, 0));
-        return eventFullDto;
+        List<Event> events = List.of(event);
+        LocalDateTime startStats = event.getCreatedOn().truncatedTo(ChronoUnit.SECONDS);
+        LocalDateTime endStats = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        EventStatistics stats = getEventStatistics(events, startStats, endStats);
+        return eventMapper.toFullDtoWithStats(event, stats);
     }
 
     @Transactional
@@ -138,17 +134,11 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
             event.setRequestModeration(updateEvent.getRequestModeration());
         }
         eventRepository.save(event);
-        EventFullDto eventFullDto = eventMapper.toFullDto(event);
-        EventViewsParameters statParams = EventViewsParameters.builder()
-                .start(event.getCreatedOn()).end(LocalDateTime.now())
-                .eventIds(List.of(event.getId())).unique(true)
-                .build();
-
-        Map<Long, Long> viewStats = getEventViews(statParams);
-        Map<Long, Integer> confirmedRequests = getConfirmedRequests(List.of(eventId));
-        eventFullDto.setViews(viewStats.getOrDefault(eventId, 0L));
-        eventFullDto.setConfirmedRequests(confirmedRequests.getOrDefault(eventId, 0));
-        return eventFullDto;
+        List<Event> events = List.of(event);
+        LocalDateTime startStats = event.getCreatedOn().truncatedTo(ChronoUnit.SECONDS);
+        LocalDateTime endStats = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        EventStatistics stats = getEventStatistics(events, startStats, endStats);
+        return eventMapper.toFullDtoWithStats(event,stats);
     }
 
     @Override
@@ -160,19 +150,12 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
         if (events.isEmpty()) {
             return List.of();
         }
-        List<Long> eventIds = events.stream().map(Event::getId).toList();
-        EventViewsParameters params = EventViewsParameters.builder()
-                .start(events.getFirst().getCreatedOn())
-                .end(LocalDateTime.now())
-                .eventIds(eventIds).unique(true).build();
-        Map<Long, Long> viewStats = getEventViews(params);
-        Map<Long, Integer> confirmedRequests = getConfirmedRequests(eventIds);
-        return events.stream().map(event -> {
-            EventShortDto shortDto = eventMapper.toShortDto(event);
-            shortDto.setViews(viewStats.getOrDefault(event.getId(), 0L));
-            shortDto.setConfirmedRequests(confirmedRequests.getOrDefault(event.getId(), 0));
-            return shortDto;
-        }).toList();
+        LocalDateTime startStats = events.getFirst().getCreatedOn().truncatedTo(ChronoUnit.SECONDS);
+        LocalDateTime endStats = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        EventStatistics stats = getEventStatistics(events, startStats, endStats);
+        return events.stream()
+                .map(event -> eventMapper.toShortDtoWithStats(event,stats))
+                .toList();
     }
 
     @Override
@@ -249,17 +232,51 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
         Event event = eventRepository.findByIdAndState(eventId, EventState.PUBLISHED)
                 .orElseThrow(() -> new NotFoundException("The required object was not found.",
                         "Event with id=" + eventId + " was not found"));
+        List<Event> events = List.of(event);
+        LocalDateTime startStats = event.getCreatedOn().truncatedTo(ChronoUnit.SECONDS);
+        LocalDateTime endStats = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        EventStatistics stats = getEventStatistics(events, startStats, endStats);
+        return eventMapper.toFullDtoWithStats(event, stats);
+    }
 
-        EventFullDto eventFullDto = eventMapper.toFullDto(event);
-        EventViewsParameters statParams = EventViewsParameters.builder()
-                .start(event.getCreatedOn()).end(LocalDateTime.now())
-                .eventIds(List.of(event.getId())).unique(true)
-                .build();
-        Map<Long, Long> viewStats = getEventViews(statParams);
-        eventFullDto.setViews(viewStats.getOrDefault(eventId, 0L));
-        Map<Long, Integer> confirmedRequests = getConfirmedRequests(List.of(eventId));
-        eventFullDto.setConfirmedRequests(confirmedRequests.getOrDefault(eventId, 0));
-        return eventFullDto;
+    @Override
+    public List<EventShortDto> getPublicEvents(PublicEventParam params) {
+        if (params.getRangeStart() != null && params.getRangeEnd() != null
+                && params.getRangeStart().isAfter(params.getRangeEnd())) {
+            throw new BadRequestException("Start date must be before end date",
+                    "Start: " + params.getRangeStart() + " End: " + params.getRangeEnd());
+        }
+
+        Pageable pageable = PageRequest.of(
+                params.getFrom() / params.getSize(),
+                params.getSize(),
+                getSort(params.getSort())
+        );
+
+        // Get events from a repository
+        Page<Event> page = eventRepository.findPublicEvents(
+                params.getText(),
+                params.getCategories(),
+                params.getPaid(),
+                params.getRangeStart(),
+                params.getRangeEnd(),
+                pageable);
+        System.out.println("PAGE: " + page.getContent().size() + " TOTAL: " + page.getTotalElements());
+
+        List<Event> events = page.getContent();
+
+        if (events.isEmpty()) {
+            return List.of();
+        }
+
+        LocalDateTime startStats = params.getRangeStart() != null ? params.getRangeStart().truncatedTo(ChronoUnit.SECONDS)
+                : events.getFirst().getCreatedOn().truncatedTo(ChronoUnit.SECONDS);
+        LocalDateTime endStats = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+
+        EventStatistics stats = getEventStatistics(events, startStats, endStats);
+        return events.stream()
+                .map(event -> eventMapper.toShortDtoWithStats(event,stats))
+                .toList();
     }
 
     @Override
@@ -302,50 +319,6 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
         return event;
     }
 
-    public List<EventShortDto> getPublicEvents(PublicEventParam params) {
-        if (params.getRangeStart() != null && params.getRangeEnd() != null
-                && params.getRangeStart().isAfter(params.getRangeEnd())) {
-            throw new BadRequestException("Start date must be before end date",
-                    "Start: " + params.getRangeStart() + " End: " + params.getRangeEnd());
-        }
-
-        Pageable pageable = PageRequest.of(
-                params.getFrom() / params.getSize(),
-                params.getSize(),
-                getSort(params.getSort())
-        );
-
-        // Get events from a repository
-        Page<Event> page = eventRepository.findPublicEvents(
-                params.getText(),
-                params.getCategories(),
-                params.getPaid(),
-                params.getRangeStart(),
-                params.getRangeEnd(),
-                pageable);
-
-        List<Event> events = page.getContent();
-
-        if (events.isEmpty()) {
-            return List.of();
-        }
-
-        List<Long> eventIds = events.stream().map(Event::getId).toList();
-        EventViewsParameters statParams = EventViewsParameters.builder()
-                .start(params.getRangeStart() != null ? params.getRangeStart() : events.getFirst().getCreatedOn())
-                .end(LocalDateTime.now())
-                .eventIds(eventIds).unique(true).build();
-        Map<Long, Long> viewStats = getEventViews(statParams);
-        Map<Long, Integer> confirmedRequests = getConfirmedRequests(eventIds);
-        return events.stream().map(event -> {
-            EventShortDto shortDto = eventMapper.toShortDto(event);
-            shortDto.setViews(viewStats.getOrDefault(event.getId(), 0L));
-            shortDto.setConfirmedRequests(confirmedRequests.getOrDefault(event.getId(), 0));
-            return shortDto;
-        }).toList();
-
-    }
-
     private Long extractId(String uri) {
         try {
             String[] parts = uri.split("/");
@@ -370,6 +343,22 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
             throw new NotFoundException("The required object was not found.",
                     "Event with id=" + id + " was not found");
         }
+    }
+
+    @Override
+    public EventStatistics getEventStatistics(List<Event> events, LocalDateTime start, LocalDateTime end) {
+        if(events.isEmpty()) {
+            return new EventStatistics(Map.of(), Map.of());
+        }
+
+        List<Long> eventIds = events.stream().map(Event::getId).toList();
+        EventViewsParameters params = EventViewsParameters.builder()
+                .start(start)
+                .end(end)
+                .eventIds(eventIds).unique(true).build();
+        Map<Long, Long> viewStats = getEventViews(params);
+        Map<Long, Integer> confirmedRequests = getConfirmedRequests(eventIds);
+        return new EventStatistics(viewStats, confirmedRequests);
     }
 
 }
