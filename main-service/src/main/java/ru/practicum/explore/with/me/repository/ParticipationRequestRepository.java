@@ -23,6 +23,7 @@ public interface ParticipationRequestRepository extends JpaRepository<Participat
                 SELECT new ru.practicum.explore.with.me.model.event.dto.EventRequestCount(r.event.id, COUNT(r))
                     FROM ParticipationRequest r
                     WHERE r.event.id IN :eventIds
+                    AND r.status = 'confirmed'
                     GROUP BY r.event.id
             """)
     List<EventRequestCount> countGroupByEventId(@Param("eventIds") List<Long> eventIds);
