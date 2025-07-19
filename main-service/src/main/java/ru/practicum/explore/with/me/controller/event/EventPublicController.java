@@ -23,6 +23,7 @@ import ru.practicum.explore.with.me.util.StatSaver;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/events")
@@ -49,7 +50,7 @@ public class EventPublicController {
         statSaver.save(request, controllerName);
 
         PublicEventParam publicEventParam = new PublicEventParam();
-        publicEventParam.setText(text);
+        publicEventParam.setText(Objects.requireNonNullElse(text, ""));
         publicEventParam.setCategories(categories);
         publicEventParam.setPaid(paid);
         publicEventParam.setRangeStart(rangeStart);
