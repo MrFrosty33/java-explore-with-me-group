@@ -8,7 +8,7 @@
 {
   "id": "long",
   "text": "string",
-  "userId": "long",
+  "authorId": "long",
   "eventId": "long",
   "createdOn": "LocalDateTime",
   "updatedOn": "LocalDateTime"
@@ -33,7 +33,7 @@
 {
   "id": "long",
   "text": "string",
-  "userDto": {
+  "authorDto": {
     "id" : "long",
     "name" : "string"
   },
@@ -61,7 +61,7 @@
 {
   "id": "long",
   "text": "string",
-  "userDto": {
+  "authorDto": {
     "id" : "long",
     "name" : "string"
   },
@@ -91,7 +91,7 @@
 {
   "id": "long",
   "text": "string",
-  "userDto": {
+  "authorDto": {
     "id" : "long",
     "name" : "string"
   },
@@ -113,7 +113,7 @@
   {
     "id": "long",
     "text": "string",
-    "userDto": {
+    "authorDto": {
       "id" : "long",
       "name" : "string"
     },
