@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explore.with.me.exception.ConflictException;
 import ru.practicum.explore.with.me.exception.NotFoundException;
 import ru.practicum.explore.with.me.mapper.CategoryMapper;
@@ -49,6 +50,7 @@ public class CategoryServiceImpl implements ExistenceValidator<Category>,
     }
 
     @Override
+    @Transactional
     public CategoryDto createCategory(NewCategoryDto categoryDto) {
         validateNameUnique(categoryDto.getName());
         Category category = categoryRepository.save(categoryMapper.toModel(categoryDto));
@@ -56,6 +58,7 @@ public class CategoryServiceImpl implements ExistenceValidator<Category>,
     }
 
     @Override
+    @Transactional
     public void deleteCategory(long id) {
         Category category = categoryRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("The required object was not found.",
@@ -69,6 +72,7 @@ public class CategoryServiceImpl implements ExistenceValidator<Category>,
     }
 
     @Override
+    @Transactional
     public CategoryDto updateCategory(long id, NewCategoryDto categoryDto) {
         Category categoryToUpdate = categoryRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("The required object was not found.",

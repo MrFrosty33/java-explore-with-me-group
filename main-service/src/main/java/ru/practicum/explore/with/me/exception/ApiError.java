@@ -14,10 +14,10 @@ public class ApiError {
     // как-то странно, в спецификации это поле есть в классе,
     // но не используется как таковое в теле ответа...
     @JsonIgnore
-    String errors;
-    HttpStatus status;
-    String reason;
-    String message;
+    private String errors;
+    private HttpStatus status;
+    private String reason;
+    private String message;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    LocalDateTime timestamp;
+    private LocalDateTime timestamp;
 }

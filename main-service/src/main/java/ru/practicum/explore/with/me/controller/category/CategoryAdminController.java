@@ -6,7 +6,6 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -30,7 +29,6 @@ public class CategoryAdminController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @Transactional
     public CategoryDto createCategory(@RequestBody @Valid NewCategoryDto category) {
         log.info("Create new category: {}", category);
         return categoryService.createCategory(category);
@@ -38,7 +36,6 @@ public class CategoryAdminController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Transactional
     public void deleteCategory(@PathVariable @NotNull @PositiveOrZero Long id) {
         log.info("Delete category with id: {}", id);
         categoryService.deleteCategory(id);
@@ -46,7 +43,6 @@ public class CategoryAdminController {
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @Transactional
     public CategoryDto updateCategory(@PathVariable @NotNull @PositiveOrZero Long id,
                                       @RequestBody @Valid NewCategoryDto category) {
         log.info("Update category with id: {}", id);

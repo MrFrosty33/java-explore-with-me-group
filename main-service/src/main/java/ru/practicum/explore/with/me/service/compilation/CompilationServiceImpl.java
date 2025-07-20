@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explore.with.me.exception.NotFoundException;
 import ru.practicum.explore.with.me.mapper.CompilationMapper;
 import ru.practicum.explore.with.me.model.compilation.Compilation;
@@ -30,6 +31,7 @@ public class CompilationServiceImpl implements CompilationService {
 
 
     @Override
+    @Transactional
     public CompilationRequestDto create(CompilationCreateDto compilationCreateDto) {
         if (compilationCreateDto.getPinned() == null) {
             compilationCreateDto.setPinned(false);
@@ -52,6 +54,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
+    @Transactional
     public CompilationRequestDto update(CompilationUpdateDto compilationUpdateDto, Long compId) {
         Compilation compilation = compilationRepository.findById(compId)
                 .orElseThrow(() -> new NotFoundException("The required object was not found.", "Compilation with id=" + compId + " was not found"));
@@ -76,6 +79,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
+    @Transactional
     public void delete(Long compId) {
         compilationRepository.findById(compId)
                 .orElseThrow(() -> new NotFoundException("The required object was not found.", "Compilation with id=" + compId + " was not found"));
