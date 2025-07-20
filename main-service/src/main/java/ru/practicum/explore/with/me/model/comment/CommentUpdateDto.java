@@ -1,14 +1,20 @@
 package ru.practicum.explore.with.me.model.comment;
 
+import lombok.Data;
+
 import java.time.LocalDateTime;
 
+@Data
 public class CommentUpdateDto {
     private long id;
     private String text;
     private AuthorDto authorDto;
-    private EventDto eventDto;
+    private CommentEventDto eventDto;
     private LocalDateTime updatedOn;
 
-    private record AuthorDto(long id, String name) {}
-    private record EventDto(long id, String title) {}
+    public static record AuthorDto(long id, String name) {
+    }
+
+    public static record CommentEventDto(long id, String title) {
+    }
 }
