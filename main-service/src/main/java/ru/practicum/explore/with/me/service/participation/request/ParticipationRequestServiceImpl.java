@@ -163,4 +163,15 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
                     "ParticipationRequest with id=" + id + " was not found");
         }
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isParticipantApproved(Long userId, Long eventId) {
+        return participationRequestRepository
+                .existsByRequesterIdAndEventIdAndStatus(
+                        userId,
+                        eventId,
+                        ParticipationRequestStatus.CONFIRMED
+                );
+    }
 }

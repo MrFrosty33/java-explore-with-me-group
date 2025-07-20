@@ -2,9 +2,11 @@ package ru.practicum.explore.with.me.controller.event;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -14,10 +16,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.explore.with.me.model.comment.CommentDto;
 import ru.practicum.explore.with.me.model.event.EventPublicSort;
 import ru.practicum.explore.with.me.model.event.PublicEventParam;
 import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
 import ru.practicum.explore.with.me.model.event.dto.EventShortDto;
+import ru.practicum.explore.with.me.service.comment.CommentService;
 import ru.practicum.explore.with.me.service.event.EventService;
 import ru.practicum.explore.with.me.util.StatSaver;
 
@@ -32,6 +36,7 @@ import java.util.Objects;
 @Validated
 public class EventPublicController {
     private final EventService eventsService;
+    private final CommentService commentService;
     private final StatSaver statSaver;
     private final String controllerName = this.getClass().getSimpleName();
 
@@ -71,5 +76,15 @@ public class EventPublicController {
         statSaver.save(request, controllerName);
         log.info("Get public event {}", eventId);
         return eventsService.getPublicEventById(eventId);
+    }
+
+    // GET /events/{eventId}/comments?from=&size=
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<CommentDto> getCommentsByEvent(@PathVariable @PositiveOrZero @NotNull Long eventId,
+                                               @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                               @RequestParam(defaultValue = "10") @Positive int size) {
+        log.info("Get public comments for event {} from {} size {}", eventId, from, size);
+        return commentService.getCommentsByEvent(eventId, PageRequest.of(from / size, size));
     }
 }

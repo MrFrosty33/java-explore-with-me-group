@@ -23,16 +23,17 @@ import ru.practicum.explore.with.me.service.comment.CommentService;
 public class CommentAdminController {
     private final CommentService commentService;
 
-    @GetMapping( "/{commentId}")
+    @GetMapping("/{commentId}")
     @ResponseStatus(HttpStatus.OK)
     public CommentDto getCommentById(@PathVariable @NotNull @PositiveOrZero Long commentId) {
         log.info("Get comment by id {}", commentId);
-        return new CommentDto();
+        return commentService.getCommentById(commentId);
     }
 
     @DeleteMapping("/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCommentById(@PathVariable @NotNull @PositiveOrZero Long commentId) {
         log.info("Delete comment with id {}", commentId);
+        commentService.deleteCommentByAdmin(commentId);
     }
 }

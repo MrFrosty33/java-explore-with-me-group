@@ -2,14 +2,17 @@ package ru.practicum.explore.with.me.controller.comment;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore.with.me.model.comment.CommentDto;
 import ru.practicum.explore.with.me.model.comment.CommentUpdateDto;
+import ru.practicum.explore.with.me.model.comment.CommentUserDto;
 import ru.practicum.explore.with.me.model.comment.NewCommentDto;
 import ru.practicum.explore.with.me.service.comment.CommentService;
 
@@ -29,7 +32,7 @@ public class CommentPrivateController {
                                     @RequestParam @NotNull @PositiveOrZero Long eventId,
                                     @RequestBody @Valid NewCommentDto commentDto) {
         log.info("Create comment {} for event {} by user {}", commentDto, eventId, userId);
-        return new CommentDto();
+        return commentService.createComment(userId, eventId, commentDto);
     }
 
     @PatchMapping("/{commentId}")
@@ -38,7 +41,7 @@ public class CommentPrivateController {
                                           @PathVariable @NotNull @PositiveOrZero Long commentId,
                                           @RequestBody @Valid NewCommentDto commentDto) {
         log.info("Update comment {} for event {} by user {}", commentDto, commentId, userId);
-        return new CommentUpdateDto();
+        return commentService.updateComment(userId, commentId, commentDto);
     }
 
     @DeleteMapping("/{commentId}")
@@ -46,12 +49,18 @@ public class CommentPrivateController {
     public void deleteComment(@PathVariable @NotNull @PositiveOrZero Long userId,
                               @PathVariable @NotNull @PositiveOrZero Long commentId) {
         log.info("Delete comment {} by user {}", commentId, userId);
+        commentService.deleteCommentByAuthor(userId, commentId);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<CommentDto> getCommentsByUser (@PathVariable @NotNull @PositiveOrZero Long userId) {
-        log.info("Get comments for user {}", userId);
-        return List.of();
+    public List<CommentUserDto> getCommentsByUser(@PathVariable @NotNull @PositiveOrZero Long userId,
+                                                  @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                                  @RequestParam(defaultValue = "10") @Positive int size) {
+        log.info("Get comments for user {} from {} size {}", userId, from, size);
+        return commentService.getCommentsByAuthor(
+                userId,
+                PageRequest.of(from / size, size)
+        );
     }
 }
