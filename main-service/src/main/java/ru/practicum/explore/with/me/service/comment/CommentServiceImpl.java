@@ -26,7 +26,6 @@ import ru.practicum.explore.with.me.util.ExistenceValidator;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -108,7 +107,9 @@ public class CommentServiceImpl implements CommentService, ExistenceValidator<Co
         comment.setAuthor(author);
         comment.setEvent(event);
 
-        return mapper.toDto(commentRepository.save(comment));
+        CommentDto result = mapper.toDto(commentRepository.save(comment));
+        log.info("{}: result of createComment(): {}", className, result);
+        return result;
     }
 
     @Override
@@ -126,22 +127,25 @@ public class CommentServiceImpl implements CommentService, ExistenceValidator<Co
 
         comment.setText(dto.getText());
         comment.setUpdatedOn(LocalDateTime.now());
-        return mapper.toUpdateDto(comment);
+        CommentUpdateDto result = mapper.toUpdateDto(comment);
+        log.info("{}: result of updateComment(): {}", className, result);
+        return result;
     }
 
     @Override
     public void deleteCommentByAuthor(Long userId, Long commentId) {
         userExistenceValidator.validateExists(userId);
-        Optional<Comment> comment = commentRepository.findById(commentId);
-        if (comment.isPresent()) {
-            if (!comment.get().getAuthor().getId().equals(userId)) {
-                log.info("{}: attempt to delete comment, but user with id: {} " +
-                        "is not an author", className, userId);
-                throw new ForbiddenException(CONDITIONS_NOT_MET,
-                        "Only author / admin can delete comment");
-            }
-            commentRepository.delete(comment.get());
+        Comment comment = getOrThrow(commentId);
+
+        if (!comment.getAuthor().getId().equals(userId)) {
+            log.info("{}: attempt to delete comment, but user with id: {} " +
+                    "is not an author", className, userId);
+            throw new ForbiddenException(CONDITIONS_NOT_MET,
+                    "Only author / admin can delete comment");
         }
+
+        commentRepository.delete(comment);
+        log.info("{}: comment with id: {} was deleted", className, commentId);
     }
 
     @Override
