@@ -25,19 +25,20 @@ import ru.practicum.explore.with.me.service.category.CategoryServiceImpl;
 @Validated
 @Slf4j
 public class CategoryAdminController {
+    private final String className = this.getClass().getSimpleName();
     private final CategoryServiceImpl categoryService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CategoryDto createCategory(@RequestBody @Valid NewCategoryDto category) {
-        log.info("Create new category: {}", category);
+        log.trace("{}: createCategory() call with category: {}", className, category);
         return categoryService.createCategory(category);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCategory(@PathVariable @NotNull @PositiveOrZero Long id) {
-        log.info("Delete category with id: {}", id);
+        log.trace("{}:  deleteCategory() call with id: {}", className, id);
         categoryService.deleteCategory(id);
     }
 
@@ -45,7 +46,7 @@ public class CategoryAdminController {
     @ResponseStatus(HttpStatus.OK)
     public CategoryDto updateCategory(@PathVariable @NotNull @PositiveOrZero Long id,
                                       @RequestBody @Valid NewCategoryDto category) {
-        log.info("Update category with id: {}", id);
+        log.trace("{}: updateCategory with id: {}", className, id);
         return categoryService.updateCategory(id, category);
     }
 }

@@ -25,11 +25,12 @@ import ru.practicum.explore.with.me.service.compilation.CompilationService;
 @Slf4j
 public class CompilationAdminController {
 
+    private final String className = this.getClass().getSimpleName();
     private final CompilationService compilationService;
 
     @PostMapping
     public ResponseEntity<CompilationRequestDto> create(@RequestBody @Valid CompilationCreateDto compilationCreateDto) {
-        log.info("Create compilation: {}", compilationCreateDto);
+        log.trace("{}: create() call with compilationCreateDto: {}", className, compilationCreateDto);
         CompilationRequestDto compilationRequestDto = compilationService.create(compilationCreateDto);
 
         return ResponseEntity
@@ -41,7 +42,7 @@ public class CompilationAdminController {
     @PatchMapping("/{compId}")
     public ResponseEntity<CompilationRequestDto> update(@RequestBody @Valid CompilationUpdateDto compilationUpdateDto,
                                                         @PathVariable Long compId) {
-        log.info("Update compilation: {}, id: {}", compilationUpdateDto, compId);
+        log.trace("{}: update() call with compilationUpdateDto: {}, compilationId: {}", className, compilationUpdateDto, compId);
         CompilationRequestDto compilationRequestDto = compilationService.update(compilationUpdateDto, compId);
 
         return ResponseEntity
@@ -53,7 +54,7 @@ public class CompilationAdminController {
     @DeleteMapping("/{compId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long compId) {
-        log.info("Delete compilation with id: {}", compId);
+        log.trace("{}: delete() call with compilationId: {}", className, compId);
         compilationService.delete(compId);
     }
 }

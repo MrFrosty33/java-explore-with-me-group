@@ -12,4 +12,6 @@ public interface ParticipationRequestService {
     ParticipationRequestDto create(NewParticipationRequest newParticipationRequest);
 
     ParticipationRequestDto cancel(CancelParticipationRequest cancelParticipationRequest);
+
+    boolean isParticipantApproved(Long userId, Long eventId);
 }
