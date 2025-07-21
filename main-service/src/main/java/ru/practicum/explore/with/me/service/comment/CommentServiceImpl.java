@@ -1,12 +1,13 @@
 package ru.practicum.explore.with.me.service.comment;
 
-import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.explore.with.me.exception.BadRequestException;
+import ru.practicum.explore.with.me.exception.ConflictException;
 import ru.practicum.explore.with.me.exception.ForbiddenException;
 import ru.practicum.explore.with.me.exception.NotFoundException;
 import ru.practicum.explore.with.me.mapper.CommentMapper;
@@ -35,7 +36,7 @@ public class CommentServiceImpl implements CommentService, ExistenceValidator<Co
 
     private static final String OBJECT_NOT_FOUND = "Required object was not found.";
     private static final String CONDITIONS_NOT_MET = "Conditions are not met.";
-    private String className = this.getClass().getSimpleName();
+    private final String className = this.getClass().getSimpleName();
 
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
@@ -89,7 +90,7 @@ public class CommentServiceImpl implements CommentService, ExistenceValidator<Co
 
         if (event.getEventDate().isBefore(LocalDateTime.now())) {
             log.info("CommentServiceImpl: attempt to comment event, which has not been happened yet");
-            throw new ValidationException("Only past events can be commented on");
+            throw new ConflictException(CONDITIONS_NOT_MET, "Only past events can be commented on");
         }
 
         if (!requestRepository
@@ -100,7 +101,7 @@ public class CommentServiceImpl implements CommentService, ExistenceValidator<Co
                 )) {
             log.info("{}: attempt to comment on event with id: {}, " +
                     "in which user with id: {} did not participate", className, event, userId);
-            throw new ValidationException("Only events the user participated in can be commented on");
+            throw new ConflictException(CONDITIONS_NOT_MET, "Only events the user participated in can be commented on");
         }
 
         Comment comment = mapper.toModel(dto);
@@ -178,7 +179,7 @@ public class CommentServiceImpl implements CommentService, ExistenceValidator<Co
 
     private void validateText(String text, int max) {
         if (text == null || text.isBlank() || text.length() > max) {
-            throw new ValidationException(
+            throw new BadRequestException("Text param constraint violation.",
                     String.format("Comment text has to be 1–%d symbols", max));
         }
     }

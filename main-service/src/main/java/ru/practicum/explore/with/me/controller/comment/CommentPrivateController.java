@@ -28,7 +28,7 @@ import ru.practicum.explore.with.me.service.comment.CommentService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/user/{userId}/comments")
+@RequestMapping("/users/{userId}/comments")
 @RequiredArgsConstructor
 @Validated
 @Slf4j
