@@ -102,12 +102,12 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/user/:userId/comments?eventId={{eventId}}",
+              "raw": "{{baseUrl}}/users/:userId/comments?eventId={{eventId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "user",
+                "users",
                 ":userId",
                 "comments"
               ],
@@ -224,12 +224,12 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/user/:userId/comments/:commentId",
+              "raw": "{{baseUrl}}/users/:userId/comments/:commentId",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "user",
+                "users",
                 ":userId",
                 "comments",
                 ":commentId"
@@ -269,7 +269,7 @@
                   "        pm.variables.set(\"commentId\", comment.id);",
                   "",
                   "        const baseUrl = pm.variables.get(\"baseUrl\");",
-                  "        pm.request.url = `${baseUrl}/user/${user.id}/comments/${comment.id}`;",
+                  "        pm.request.url = `${baseUrl}/users/${user.id}/comments/${comment.id}`;",
                   "    } catch(err) {",
                   "        console.error(\"Failed to prepare test data\", err);",
                   "    }",
@@ -315,12 +315,12 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/user/:userId/comments/:commentId",
+              "raw": "{{baseUrl}}/users/:userId/comments/:commentId",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "user",
+                "users",
                 ":userId",
                 "comments",
                 ":commentId"
@@ -359,7 +359,7 @@
                   "        pm.variables.set(\"userId\", user.id);",
                   "",
                   "        const baseUrl = pm.variables.get(\"baseUrl\");",
-                  "        pm.request.url = `${baseUrl}/user/${user.id}/comments`;",
+                  "        pm.request.url = `${baseUrl}/users/${user.id}/comments`;",
                   "    } catch(err) {",
                   "        console.error(\"Failed to prepare test data\", err);",
                   "    }",
@@ -419,12 +419,12 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/user/:userId/comments",
+              "raw": "{{baseUrl}}/users/:userId/comments",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "user",
+                "users",
                 ":userId",
                 "comments"
               ],
@@ -758,7 +758,7 @@
                   "        pm.variables.set(\"eventId\", event.id);",
                   "",
                   "        const baseUrl = pm.variables.get(\"baseUrl\");",
-                  "        pm.request.url = `${baseUrl}/user/${user.id}/comments?eventId=${event.id}`;",
+                  "        pm.request.url = `${baseUrl}/users/${user.id}/comments?eventId=${event.id}`;",
                   "",
                   "        pm.request.body.update({",
                   "            mode: 'raw',",
@@ -810,12 +810,12 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/user/:userId/comments?eventId={{eventId}}",
+              "raw": "{{baseUrl}}/users/:userId/comments?eventId={{eventId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "user",
+                "users",
                 ":userId",
                 "comments"
               ],
@@ -857,7 +857,7 @@
                   "        pm.variables.set(\"commentId\", comment.id);",
                   "",
                   "        const baseUrl = pm.variables.get(\"baseUrl\");",
-                  "        pm.request.url = `${baseUrl}/user/${user2.id}/comments/${comment.id}`;",
+                  "        pm.request.url = `${baseUrl}/users/${user2.id}/comments/${comment.id}`;",
                   "",
                   "        pm.request.body.update({",
                   "            mode: 'raw',",
@@ -909,12 +909,12 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/user/:userId/comments/:commentId",
+              "raw": "{{baseUrl}}/users/:userId/comments/:commentId",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "user",
+                "users",
                 ":userId",
                 "comments",
                 ":commentId"
