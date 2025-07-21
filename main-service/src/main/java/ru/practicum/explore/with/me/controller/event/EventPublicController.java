@@ -38,7 +38,7 @@ public class EventPublicController {
     private final EventService eventsService;
     private final CommentService commentService;
     private final StatSaver statSaver;
-    private final String controllerName = this.getClass().getSimpleName();
+    private final String className = this.getClass().getSimpleName();
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
@@ -52,7 +52,7 @@ public class EventPublicController {
                                          @RequestParam(defaultValue = "0") int from,
                                          @RequestParam(defaultValue = "10") int size,
                                          HttpServletRequest request) {
-        statSaver.save(request, controllerName);
+        statSaver.save(request, className);
 
         PublicEventParam publicEventParam = new PublicEventParam();
         publicEventParam.setText(Objects.requireNonNullElse(text, ""));
@@ -64,7 +64,7 @@ public class EventPublicController {
         publicEventParam.setSort(sort);
         publicEventParam.setFrom(from);
         publicEventParam.setSize(size);
-        log.info("Get all public events with params: {}", publicEventParam);
+        log.trace("{}: getEvents() call with publicEventParam: {}", className, publicEventParam);
 
         return eventsService.getPublicEvents(publicEventParam);
     }
@@ -73,8 +73,8 @@ public class EventPublicController {
     @ResponseStatus(HttpStatus.OK)
     public EventFullDto getEventById(@PathVariable @PositiveOrZero @NotNull Long eventId,
                                      HttpServletRequest request) {
-        statSaver.save(request, controllerName);
-        log.info("Get public event {}", eventId);
+        statSaver.save(request, className);
+        log.trace("{}: getEventById() call with eventId: {}", className, eventId);
         return eventsService.getPublicEventById(eventId);
     }
 
@@ -84,7 +84,8 @@ public class EventPublicController {
     public List<CommentDto> getCommentsByEvent(@PathVariable @PositiveOrZero @NotNull Long eventId,
                                                @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                                @RequestParam(defaultValue = "10") @Positive int size) {
-        log.info("Get public comments for event {} from {} size {}", eventId, from, size);
+        log.trace("{}: getCommentsByEvent() call with eventId: {}, from: {}, size: {}",
+                className, eventId, from, size);
         return commentService.getCommentsByEvent(eventId, PageRequest.of(from / size, size));
     }
 }

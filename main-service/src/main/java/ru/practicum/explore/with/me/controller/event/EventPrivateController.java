@@ -34,13 +34,14 @@ import java.util.List;
 @RequiredArgsConstructor
 @Validated
 public class EventPrivateController {
+    private final String className = this.getClass().getSimpleName();
     private final EventService eventsService;
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto createEvent(@PathVariable @PositiveOrZero @NotNull Long userId,
                                     @RequestBody @Valid NewEventDto event) {
-        log.info("Create event {}", event);
+        log.trace("{}: createEvent() call with userId: {}, event: {}", className, userId, event);
         return eventsService.createEvent(userId, event);
     }
 
@@ -48,7 +49,7 @@ public class EventPrivateController {
     @ResponseStatus(HttpStatus.OK)
     public EventFullDto getEventById(@PathVariable @PositiveOrZero @NotNull Long userId,
                                      @PathVariable @PositiveOrZero @NotNull Long eventId) {
-        log.info("Get event {}", eventId);
+        log.trace("{}: getEventById() call with userId: {}, eventId: {}", className, userId, eventId);
         return eventsService.getPrivateEventById(userId, eventId);
     }
 
@@ -57,7 +58,8 @@ public class EventPrivateController {
     public EventFullDto updateEvent(@PathVariable @PositiveOrZero @NotNull Long userId,
                                     @PathVariable @PositiveOrZero @NotNull Long eventId,
                                     @RequestBody @Valid UpdateEventUserRequest updateEvent) {
-        log.info("Update event {}", eventId);
+        log.trace("{}: updateEvent() call with userId: {}, eventId: {}, updateEvent: {}",
+                className, userId, eventId, updateEvent);
         return eventsService.updateEvent(userId, eventId, updateEvent);
     }
 
@@ -66,7 +68,7 @@ public class EventPrivateController {
     public List<EventShortDto> getEvents(@PathVariable @PositiveOrZero @NotNull Long userId,
                                          @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                          @RequestParam(defaultValue = "10") @Positive int size) {
-        log.info("Get events (private scope) by user {}", userId);
+        log.trace("{}: getEvents() call with userId: {}, from: {}, size: {}", className, userId, from, size);
         return eventsService.getEventsByUser(userId, from, size);
     }
 
@@ -74,7 +76,8 @@ public class EventPrivateController {
     @ResponseStatus(HttpStatus.OK)
     public List<ParticipationRequestDto> getEventParticipationRequestsByUser(@PathVariable @PositiveOrZero @NotNull Long userId,
                                                                              @PathVariable @PositiveOrZero @NotNull Long eventId) {
-        log.info("Get event participation requests by user {} for the event {}", userId, eventId);
+        log.trace("{}: getEventParticipationRequestsByUser() call with userId: {}, eventId: {}",
+                className, userId, eventId);
         return eventsService.getEventParticipationRequestsByUser(userId, eventId);
     }
 
@@ -83,7 +86,8 @@ public class EventPrivateController {
     public EventRequestStatusUpdateResult updateEventRequestStatus(@PathVariable @PositiveOrZero @NotNull Long userId,
                                                                    @PathVariable @PositiveOrZero @NotNull Long eventId,
                                                                    @RequestBody @Valid EventRequestStatusUpdateRequest updateRequest) {
-        log.info("Update participation requests status {}", updateRequest);
+        log.trace("{}: getEventParticipationRequestsByUser() call with userId: {}, eventId: {}, updateRequest: {}",
+                className, userId, eventId, updateRequest);
         return eventsService.updateEventRequestStatus(userId, eventId, updateRequest);
     }
 }

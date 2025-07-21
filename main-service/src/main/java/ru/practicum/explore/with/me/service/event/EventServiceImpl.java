@@ -54,6 +54,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class EventServiceImpl implements ExistenceValidator<Event>, EventService {
+    private final String className = this.getClass().getSimpleName();
+
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
@@ -65,12 +67,10 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
     @Transactional
     @Override
     public EventFullDto createEvent(long userId, NewEventDto eventDto) {
-        User user = userRepository.findById(userId).orElseThrow(() ->
-                new NotFoundException("The required object was not found.", "User with id=" + userId + " was not found"));
+        User user = findUserByIdOrElseThrow(userId);
 
         long categoryId = eventDto.getCategory();
-        Category category = categoryRepository.findById(categoryId).orElseThrow(() ->
-                new NotFoundException("The required object was not found.", "Category with id=" + categoryId + " was not found"));
+        Category category = findCategoryByIdOrElseThrow(categoryId);
 
         Event event = eventMapper.toModel(eventDto);
         event.setInitiator(user);
@@ -79,6 +79,8 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
         Event eventSaved = eventRepository.save(event);
         EventFullDto eventFullDto = eventMapper.toFullDto(eventSaved);
         eventFullDto.setViews(0L);
+
+        log.info("{}: result of createEvent(): {}", className, eventFullDto);
         return eventFullDto;
     }
 
@@ -90,7 +92,9 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
         LocalDateTime startStats = event.getCreatedOn().truncatedTo(ChronoUnit.SECONDS);
         LocalDateTime endStats = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         EventStatistics stats = getEventStatistics(events, startStats, endStats);
-        return eventMapper.toFullDtoWithStats(event, stats);
+        EventFullDto result = eventMapper.toFullDtoWithStats(event, stats);
+        log.info("{}: result of getPrivateEventById(): {}", className, result);
+        return result;
     }
 
     @Transactional
@@ -106,8 +110,7 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
 
         if (updateEvent.getCategory() != null) {
             long categoryId = updateEvent.getCategory();
-            Category category = categoryRepository.findById(categoryId).orElseThrow(() ->
-                    new NotFoundException("The required object was not found.", "Category with id=" + categoryId + " was not found"));
+            Category category = findCategoryByIdOrElseThrow(categoryId);
             event.setCategory(category);
         }
 
@@ -148,14 +151,15 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
         LocalDateTime startStats = event.getCreatedOn().truncatedTo(ChronoUnit.SECONDS);
         LocalDateTime endStats = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         EventStatistics stats = getEventStatistics(events, startStats, endStats);
-        return eventMapper.toFullDtoWithStats(event, stats);
+        EventFullDto result = eventMapper.toFullDtoWithStats(event, stats);
+        log.info("{}: result of updateEvent(): {}", className, result);
+        return result;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<EventShortDto> getEventsByUser(long userId, int from, int count) {
-        User user = userRepository.findById(userId).orElseThrow(() ->
-                new NotFoundException("The required object was not found.", "User with id=" + userId + " was not found"));
+        User user = findUserByIdOrElseThrow(userId);
         Pageable pageable = PageRequest.of(from, count, Sort.by("createdOn").ascending());
         List<Event> events = eventRepository.findEventsByUser(user, pageable).getContent();
         if (events.isEmpty()) {
@@ -164,9 +168,11 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
         LocalDateTime startStats = events.getFirst().getCreatedOn().truncatedTo(ChronoUnit.SECONDS);
         LocalDateTime endStats = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         EventStatistics stats = getEventStatistics(events, startStats, endStats);
-        return events.stream()
+        List<EventShortDto> result = events.stream()
                 .map(event -> eventMapper.toShortDtoWithStats(event, stats))
                 .toList();
+        log.info("{}: result of getEventsByUser(): {}", className, result);
+        return result;
     }
 
     @Override
@@ -243,13 +249,18 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
     @Transactional(readOnly = true)
     public EventFullDto getPublicEventById(long eventId) {
         Event event = eventRepository.findByIdAndState(eventId, EventState.PUBLISHED)
-                .orElseThrow(() -> new NotFoundException("The required object was not found.",
-                        "Event with id=" + eventId + " was not found"));
+                .orElseThrow(() -> {
+                    log.info("{}: attempt to find event with id: {}", className, eventId);
+                    return new NotFoundException("The required object was not found.",
+                            "Event with id=" + eventId + " was not found");
+                });
         List<Event> events = List.of(event);
         LocalDateTime startStats = event.getCreatedOn().truncatedTo(ChronoUnit.SECONDS);
         LocalDateTime endStats = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         EventStatistics stats = getEventStatistics(events, startStats, endStats);
-        return eventMapper.toFullDtoWithStats(event, stats);
+        EventFullDto result = eventMapper.toFullDtoWithStats(event, stats);
+        log.info("{}: result of getPublicEventById(): {}", className, result);
+        return result;
     }
 
     @Override
@@ -257,6 +268,8 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
     public List<EventShortDto> getPublicEvents(PublicEventParam params) {
         if (params.getRangeStart() != null && params.getRangeEnd() != null
                 && params.getRangeStart().isAfter(params.getRangeEnd())) {
+            log.info("{}: getPublicEvents() call, where rangeStart:{} is not before rangeEnd: {}",
+                    className, params.getRangeStart(), params.getRangeEnd());
             throw new BadRequestException("Start date must be before end date",
                     "Start: " + params.getRangeStart() + " End: " + params.getRangeEnd());
         }
@@ -287,9 +300,11 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
         LocalDateTime endStats = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
 
         EventStatistics stats = getEventStatistics(events, startStats, endStats);
-        return events.stream()
+        List<EventShortDto> result = events.stream()
                 .map(event -> eventMapper.toShortDtoWithStats(event, stats))
                 .toList();
+        log.info("{}: result of getPublicEvents(): {}", className, result);
+        return result;
     }
 
     @Override
@@ -304,18 +319,21 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
                 }
             }
         }
+        log.info("{}: result of getEventViews: {}", className, views);
         return views;
     }
 
     @Override
     public Map<Long, Integer> getConfirmedRequests(List<Long> eventIds) {
         List<EventRequestCount> confirmedRequests = requestRepository.countGroupByEventId(eventIds);
-        return confirmedRequests.stream().collect(
+        Map<Long, Integer> result = confirmedRequests.stream().collect(
                 Collectors.toMap(
                         EventRequestCount::eventId,
                         r -> r.count().intValue()
                 )
         );
+        log.info("{}: result of getConfirmedRequests: {}", className, result);
+        return result;
     }
 
     private Event getEventIfInitiatedByUser(long userId, long eventId) {
@@ -329,7 +347,22 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
             throw new ConflictException("For the requested operation the conditions are not met.",
                     "Only initiator of event can can manipulate with it");
         }
+        log.info("{}: result of getEventIfInitiatedByUser(): {}", className, event);
         return event;
+    }
+
+    private User findUserByIdOrElseThrow(long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> {
+            log.info("{}: user with id: {} was not found", className, userId);
+            return new NotFoundException("The required object was not found.", "User with id=" + userId + " was not found");
+        });
+    }
+
+    private Category findCategoryByIdOrElseThrow(long categoryId) {
+        return categoryRepository.findById(categoryId).orElseThrow(() -> {
+            log.info("{}: category with id: {} was not found", className, categoryId);
+            return new NotFoundException("The required object was not found.", "Category with id=" + categoryId + " was not found");
+        });
     }
 
     private Long extractId(String uri) {
@@ -371,7 +404,9 @@ public class EventServiceImpl implements ExistenceValidator<Event>, EventService
                 .eventIds(eventIds).unique(true).build();
         Map<Long, Long> viewStats = getEventViews(params);
         Map<Long, Integer> confirmedRequests = getConfirmedRequests(eventIds);
-        return new EventStatistics(viewStats, confirmedRequests);
+        EventStatistics result = new EventStatistics(viewStats, confirmedRequests);
+        log.info("{}: result of getEventStatistics(): {}", className, result);
+        return result;
     }
 
 }

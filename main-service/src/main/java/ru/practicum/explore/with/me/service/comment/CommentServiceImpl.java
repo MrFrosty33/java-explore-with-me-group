@@ -36,6 +36,7 @@ public class CommentServiceImpl implements CommentService, ExistenceValidator<Co
 
     private static final String OBJECT_NOT_FOUND = "Required object was not found.";
     private static final String CONDITIONS_NOT_MET = "Conditions are not met.";
+    private String className = this.getClass().getSimpleName();
 
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
@@ -52,13 +53,13 @@ public class CommentServiceImpl implements CommentService, ExistenceValidator<Co
     @Transactional(rollbackFor = Exception.class)
     public CommentDto getCommentById(Long id) {
         CommentDto result = mapper.toDto(getOrThrow(id));
-        log.info("CommentServiceImpl: result of getCommentById({}): {}", id, result);
+        log.info("{}: result of getCommentById({}): {}", className, id, result);
         return result;
     }
 
     @Override
     public void deleteCommentByAdmin(Long id) {
-        log.info("CommentServiceImpl: comment with id: {} was deleted, if it existed", id);
+        log.info("{}: comment with id: {} was deleted, if it existed", className, id);
         commentRepository.deleteById(id);
     }
 
@@ -71,7 +72,7 @@ public class CommentServiceImpl implements CommentService, ExistenceValidator<Co
 
         User author = userRepository.findById(userId)
                 .orElseThrow(() -> {
-                            log.info("CommentServiceImpl: attempt to find user with id: {}", userId);
+                    log.info("{}: attempt to find user with id: {}", className, userId);
                             return new NotFoundException(
                                     OBJECT_NOT_FOUND,
                                     String.format("User with id: %d was not found", userId));
@@ -80,7 +81,7 @@ public class CommentServiceImpl implements CommentService, ExistenceValidator<Co
 
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> {
-                            log.info("CommentServiceImpl: attempt to find event with id: {}", eventId);
+                    log.info("{}: attempt to find event with id: {}", className, eventId);
                             return new NotFoundException(
                                     OBJECT_NOT_FOUND,
                                     String.format("Event with id: %d was not found", eventId));
@@ -98,8 +99,8 @@ public class CommentServiceImpl implements CommentService, ExistenceValidator<Co
                         eventId,
                         ParticipationRequestStatus.CONFIRMED
                 )) {
-            log.info("CommentServiceImpl: attempt to comment on event with id: {}, " +
-                    "in which user with id: {} did not participate", event, userId);
+            log.info("{}: attempt to comment on event with id: {}, " +
+                    "in which user with id: {} did not participate", className, event, userId);
             throw new ValidationException("Only events the user participated in can be commented on");
         }
 
@@ -117,8 +118,8 @@ public class CommentServiceImpl implements CommentService, ExistenceValidator<Co
 
         Comment comment = getOrThrow(commentId);
         if (!comment.getAuthor().getId().equals(userId)) {
-            log.info("CommentServiceImpl: attempt to redact comment with id: {} by a user with id: {}, " +
-                    "which is not an author", commentId, userId);
+            log.info("{}: attempt to redact comment with id: {} by a user with id: {}, " +
+                    "which is not an author", className, commentId, userId);
             throw new ForbiddenException(CONDITIONS_NOT_MET,
                     "Only author can redact comment");
         }
@@ -134,8 +135,8 @@ public class CommentServiceImpl implements CommentService, ExistenceValidator<Co
         Optional<Comment> comment = commentRepository.findById(commentId);
         if (comment.isPresent()) {
             if (!comment.get().getAuthor().getId().equals(userId)) {
-                log.info("CommentServiceImpl: attempt to delete comment, but user with id: {} " +
-                        "is not an author", userId);
+                log.info("{}: attempt to delete comment, but user with id: {} " +
+                        "is not an author", className, userId);
                 throw new ForbiddenException(CONDITIONS_NOT_MET,
                         "Only author / admin can delete comment");
             }
@@ -151,7 +152,7 @@ public class CommentServiceImpl implements CommentService, ExistenceValidator<Co
                 .stream()
                 .map(mapper::toUserDto)
                 .toList();
-        log.info("CommentServiceImpl: result of getCommentsByAuthor(): {}", result);
+        log.info("{}: result of getCommentsByAuthor(): {}", className, result);
         return result;
     }
 
@@ -166,7 +167,7 @@ public class CommentServiceImpl implements CommentService, ExistenceValidator<Co
                 .stream()
                 .map(mapper::toDto)
                 .toList();
-        log.info("CommentServiceImpl: result of getCommentsByEvent(): {}", result);
+        log.info("{}: result of getCommentsByEvent(): {}", className, result);
         return result;
     }
 
@@ -181,7 +182,7 @@ public class CommentServiceImpl implements CommentService, ExistenceValidator<Co
     private Comment getOrThrow(Long id) {
         return commentRepository.findById(id)
                 .orElseThrow(() -> {
-                            log.info("CommentServiceImpl: comment with id: {} was not found", id);
+                    log.info("{}: comment with id: {} was not found", className, id);
                             return new NotFoundException(
                                     OBJECT_NOT_FOUND,
                                     String.format("Comment with id: %d was not found", id));
@@ -192,7 +193,7 @@ public class CommentServiceImpl implements CommentService, ExistenceValidator<Co
     @Override
     public void validateExists(Long id) {
         if (commentRepository.findById(id).isEmpty()) {
-            log.info("attempt to find comment with id: {}", id);
+            log.info("{}: attempt to find comment with id: {}", className, id);
             throw new NotFoundException(OBJECT_NOT_FOUND,
                     "Comment with id=" + id + " was not found");
         }
