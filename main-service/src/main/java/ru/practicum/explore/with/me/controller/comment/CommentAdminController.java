@@ -21,19 +21,20 @@ import ru.practicum.explore.with.me.service.comment.CommentService;
 @Validated
 @Slf4j
 public class CommentAdminController {
+    private final String className = this.getClass().getSimpleName();
     private final CommentService commentService;
 
     @GetMapping("/{commentId}")
     @ResponseStatus(HttpStatus.OK)
     public CommentDto getCommentById(@PathVariable @NotNull @PositiveOrZero Long commentId) {
-        log.info("Get comment by id {}", commentId);
+        log.trace("{}: getCommentById() call with commentId: {}", className, commentId);
         return commentService.getCommentById(commentId);
     }
 
     @DeleteMapping("/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCommentById(@PathVariable @NotNull @PositiveOrZero Long commentId) {
-        log.info("Delete comment with id {}", commentId);
+        log.trace("{}: deleteCommentById() call with commentId: {}", className, commentId);
         commentService.deleteCommentByAdmin(commentId);
     }
 }

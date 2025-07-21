@@ -33,6 +33,7 @@ import java.util.List;
 @Validated
 @Slf4j
 public class CommentPrivateController {
+    private final String className = this.getClass().getSimpleName();
     private final CommentService commentService;
 
     @PostMapping
@@ -40,7 +41,8 @@ public class CommentPrivateController {
     public CommentDto createComment(@PathVariable @NotNull @PositiveOrZero Long userId,
                                     @RequestParam @NotNull @PositiveOrZero Long eventId,
                                     @RequestBody @Valid CreateUpdateCommentDto commentDto) {
-        log.info("Create comment {} for event {} by user {}", commentDto, eventId, userId);
+        log.trace("{}: createComment() call with userId: {}, eventId: {}, commentDto: {}",
+                className, userId, eventId, commentDto);
         return commentService.createComment(userId, eventId, commentDto);
     }
 
@@ -57,7 +59,7 @@ public class CommentPrivateController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteComment(@PathVariable @NotNull @PositiveOrZero Long userId,
                               @PathVariable @NotNull @PositiveOrZero Long commentId) {
-        log.info("Delete comment {} by user {}", commentId, userId);
+        log.trace("{}:  deleteComment() call with userId: {}, commentId: {}", className, userId, commentId);
         commentService.deleteCommentByAuthor(userId, commentId);
     }
 
@@ -66,7 +68,7 @@ public class CommentPrivateController {
     public List<CommentUserDto> getCommentsByUser(@PathVariable @NotNull @PositiveOrZero Long userId,
                                                   @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                                   @RequestParam(defaultValue = "10") @Positive int size) {
-        log.info("Get comments for user {} from {} size {}", userId, from, size);
+        log.trace("{}: getCommentsByUser() call with userId: {}, from: {}, size: {}", className, userId, from, size);
         return commentService.getCommentsByAuthor(
                 userId,
                 PageRequest.of(from / size, size)

@@ -78,8 +78,7 @@ public class EventPublicController {
         return eventsService.getPublicEventById(eventId);
     }
 
-    // GET /events/{eventId}/comments?from=&size=
-    @GetMapping
+    @GetMapping("/{eventId}/comments")
     @ResponseStatus(HttpStatus.OK)
     public List<CommentDto> getCommentsByEvent(@PathVariable @PositiveOrZero @NotNull Long eventId,
                                                @RequestParam(defaultValue = "0") @PositiveOrZero int from,
