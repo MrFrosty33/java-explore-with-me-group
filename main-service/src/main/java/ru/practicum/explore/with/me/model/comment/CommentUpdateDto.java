@@ -8,11 +8,11 @@ import java.time.LocalDateTime;
 public class CommentUpdateDto {
     private long id;
     private String text;
-    private AuthorDto authorDto;
+    private CommentAuthorDto authorDto;
     private CommentEventDto eventDto;
     private LocalDateTime updatedOn;
 
-    public static record AuthorDto(long id, String name) {
+    public static record CommentAuthorDto(long id, String name) {
     }
 
     public static record CommentEventDto(long id, String title) {

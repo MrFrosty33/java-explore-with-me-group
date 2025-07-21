@@ -6,7 +6,7 @@ import ru.practicum.explore.with.me.model.comment.Comment;
 import ru.practicum.explore.with.me.model.comment.CommentDto;
 import ru.practicum.explore.with.me.model.comment.CommentUpdateDto;
 import ru.practicum.explore.with.me.model.comment.CommentUserDto;
-import ru.practicum.explore.with.me.model.comment.NewCommentDto;
+import ru.practicum.explore.with.me.model.comment.CreateUpdateCommentDto;
 
 @Mapper(componentModel = "spring", uses = {UserMapper.class, EventMapper.class})
 public interface CommentMapper {
@@ -19,7 +19,7 @@ public interface CommentMapper {
     @Mapping(target = "updatedOn", ignore = true)
     @Mapping(target = "event", ignore = true)
     @Mapping(target = "author", ignore = true)
-    Comment toModel(NewCommentDto newCommentDto);
+    Comment toModel(CreateUpdateCommentDto createUpdateCommentDto);
 
     @Mapping(target = "eventDto", source = "event")
     CommentUserDto toUserDto(Comment comment);

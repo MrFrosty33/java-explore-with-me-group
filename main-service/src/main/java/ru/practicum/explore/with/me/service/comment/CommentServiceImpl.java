@@ -2,6 +2,7 @@ package ru.practicum.explore.with.me.service.comment;
 
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -9,29 +10,40 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explore.with.me.exception.ForbiddenException;
 import ru.practicum.explore.with.me.exception.NotFoundException;
 import ru.practicum.explore.with.me.mapper.CommentMapper;
-import ru.practicum.explore.with.me.model.comment.*;
+import ru.practicum.explore.with.me.model.comment.Comment;
+import ru.practicum.explore.with.me.model.comment.CommentDto;
+import ru.practicum.explore.with.me.model.comment.CommentUpdateDto;
+import ru.practicum.explore.with.me.model.comment.CommentUserDto;
+import ru.practicum.explore.with.me.model.comment.CreateUpdateCommentDto;
 import ru.practicum.explore.with.me.model.event.Event;
+import ru.practicum.explore.with.me.model.participation.ParticipationRequestStatus;
 import ru.practicum.explore.with.me.model.user.User;
 import ru.practicum.explore.with.me.repository.CommentRepository;
 import ru.practicum.explore.with.me.repository.EventRepository;
-import ru.practicum.explore.with.me.service.participation.request.ParticipationRequestService;
+import ru.practicum.explore.with.me.repository.ParticipationRequestRepository;
+import ru.practicum.explore.with.me.repository.UserRepository;
+import ru.practicum.explore.with.me.util.ExistenceValidator;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(propagation = Propagation.REQUIRED)
-public class CommentServiceImpl implements CommentService {
+@Slf4j
+public class CommentServiceImpl implements CommentService, ExistenceValidator<Comment> {
 
-    private static final String OBJECT_NOT_FOUND   = "Required object was not found.";
+    private static final String OBJECT_NOT_FOUND = "Required object was not found.";
     private static final String CONDITIONS_NOT_MET = "Conditions are not met.";
 
-    private final CommentRepository            repository;
-    private final EventRepository              eventRepository;
-    private final ParticipationRequestService  requestService;
-    private final CommentMapper                mapper;
-
+    private final CommentRepository commentRepository;
+    private final UserRepository userRepository;
+    private final EventRepository eventRepository;
+    private final ParticipationRequestRepository requestRepository;
+    private final ExistenceValidator<User> userExistenceValidator;
+    private final ExistenceValidator<Event> eventExistenceValidator;
+    private final CommentMapper mapper;
 
 
     // admin
@@ -39,50 +51,76 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public CommentDto getCommentById(Long id) {
-        return mapper.toDto(getOrThrow(id));
+        CommentDto result = mapper.toDto(getOrThrow(id));
+        log.info("CommentServiceImpl: result of getCommentById({}): {}", id, result);
+        return result;
     }
 
     @Override
     public void deleteCommentByAdmin(Long id) {
-        repository.deleteById(id);
+        log.info("CommentServiceImpl: comment with id: {} was deleted, if it existed", id);
+        commentRepository.deleteById(id);
     }
-
 
 
     //private
 
     @Override
-    public CommentDto createComment(Long userId, Long eventId, NewCommentDto dto) {
+    public CommentDto createComment(Long userId, Long eventId, CreateUpdateCommentDto dto) {
         validateText(dto.getText(), 100);
 
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException(
-                        OBJECT_NOT_FOUND,
-                        String.format("Событие %d не найдено", eventId)
-                ));
+        User author = userRepository.findById(userId)
+                .orElseThrow(() -> {
+                            log.info("CommentServiceImpl: attempt to find user with id: {}", userId);
+                            return new NotFoundException(
+                                    OBJECT_NOT_FOUND,
+                                    String.format("User with id: %d was not found", userId));
+                        }
+                );
 
-        if (event.getEventDate().isAfter(LocalDateTime.now())) {
-            throw new ValidationException("Комментировать можно только прошедшие события");
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> {
+                            log.info("CommentServiceImpl: attempt to find event with id: {}", eventId);
+                            return new NotFoundException(
+                                    OBJECT_NOT_FOUND,
+                                    String.format("Event with id: %d was not found", eventId));
+                        }
+                );
+
+        if (event.getEventDate().isBefore(LocalDateTime.now())) {
+            log.info("CommentServiceImpl: attempt to comment event, which has not been happened yet");
+            throw new ValidationException("Only past events can be commented on");
         }
-        if (!requestService.isParticipantApproved(userId, eventId)) {
-            throw new ValidationException("Нужна одобренная заявка на участие");
+
+        if (!requestRepository
+                .existsByRequesterIdAndEventIdAndStatus(
+                        userId,
+                        eventId,
+                        ParticipationRequestStatus.CONFIRMED
+                )) {
+            log.info("CommentServiceImpl: attempt to comment on event with id: {}, " +
+                    "in which user with id: {} did not participate", event, userId);
+            throw new ValidationException("Only events the user participated in can be commented on");
         }
 
         Comment comment = mapper.toModel(dto);
-        comment.setAuthor(new User(userId, null, null));
+        comment.setAuthor(author);
         comment.setEvent(event);
 
-        return mapper.toDto(repository.save(comment));
+        return mapper.toDto(commentRepository.save(comment));
     }
 
     @Override
-    public CommentUpdateDto updateComment(Long userId, Long commentId, NewCommentDto dto) {
+    public CommentUpdateDto updateComment(Long userId, Long commentId, CreateUpdateCommentDto dto) {
+        userExistenceValidator.validateExists(userId);
         validateText(dto.getText(), 1000);
 
         Comment comment = getOrThrow(commentId);
         if (!comment.getAuthor().getId().equals(userId)) {
+            log.info("CommentServiceImpl: attempt to redact comment with id: {} by a user with id: {}, " +
+                    "which is not an author", commentId, userId);
             throw new ForbiddenException(CONDITIONS_NOT_MET,
-                    "Редактировать может только автор");
+                    "Only author can redact comment");
         }
 
         comment.setText(dto.getText());
@@ -92,23 +130,30 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void deleteCommentByAuthor(Long userId, Long commentId) {
-        Comment comment = getOrThrow(commentId);
-        if (!comment.getAuthor().getId().equals(userId)) {
-            throw new ForbiddenException(CONDITIONS_NOT_MET,
-                    "Удалять может только автор");
+        userExistenceValidator.validateExists(userId);
+        Optional<Comment> comment = commentRepository.findById(commentId);
+        if (comment.isPresent()) {
+            if (!comment.get().getAuthor().getId().equals(userId)) {
+                log.info("CommentServiceImpl: attempt to delete comment, but user with id: {} " +
+                        "is not an author", userId);
+                throw new ForbiddenException(CONDITIONS_NOT_MET,
+                        "Only author / admin can delete comment");
+            }
+            commentRepository.delete(comment.get());
         }
-        repository.delete(comment);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<CommentUserDto> getCommentsByAuthor(Long userId, Pageable pageable) {
-        return repository.findByAuthorIdOrderByCreatedOnDesc(userId, pageable)
+        userExistenceValidator.validateExists(userId);
+        List<CommentUserDto> result = commentRepository.findByAuthorIdOrderByCreatedOnDesc(userId, pageable)
                 .stream()
                 .map(mapper::toUserDto)
                 .toList();
+        log.info("CommentServiceImpl: result of getCommentsByAuthor(): {}", result);
+        return result;
     }
-
 
 
     //public
@@ -116,26 +161,40 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional(readOnly = true)
     public List<CommentDto> getCommentsByEvent(Long eventId, Pageable pageable) {
-        return repository.findByEventIdOrderByCreatedOnDesc(eventId, pageable)
+        eventExistenceValidator.validateExists(eventId);
+        List<CommentDto> result = commentRepository.findByEventIdOrderByCreatedOnDesc(eventId, pageable)
                 .stream()
                 .map(mapper::toDto)
                 .toList();
+        log.info("CommentServiceImpl: result of getCommentsByEvent(): {}", result);
+        return result;
     }
-
 
 
     private void validateText(String text, int max) {
         if (text == null || text.isBlank() || text.length() > max) {
             throw new ValidationException(
-                    String.format("Текст комментария должен быть 1–%d символов", max));
+                    String.format("Comment text has to be 1–%d symbols", max));
         }
     }
 
     private Comment getOrThrow(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        OBJECT_NOT_FOUND,
-                        String.format("Комментарий %d не найден", id)
-                ));
+        return commentRepository.findById(id)
+                .orElseThrow(() -> {
+                            log.info("CommentServiceImpl: comment with id: {} was not found", id);
+                            return new NotFoundException(
+                                    OBJECT_NOT_FOUND,
+                                    String.format("Comment with id: %d was not found", id));
+                        }
+                );
+    }
+
+    @Override
+    public void validateExists(Long id) {
+        if (commentRepository.findById(id).isEmpty()) {
+            log.info("attempt to find comment with id: {}", id);
+            throw new NotFoundException(OBJECT_NOT_FOUND,
+                    "Comment with id=" + id + " was not found");
+        }
     }
 }

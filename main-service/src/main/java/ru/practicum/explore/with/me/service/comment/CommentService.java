@@ -1,13 +1,12 @@
 package ru.practicum.explore.with.me.service.comment;
 
 import org.springframework.data.domain.Pageable;
-
-import java.util.List;
-
 import ru.practicum.explore.with.me.model.comment.CommentDto;
 import ru.practicum.explore.with.me.model.comment.CommentUpdateDto;
 import ru.practicum.explore.with.me.model.comment.CommentUserDto;
-import ru.practicum.explore.with.me.model.comment.NewCommentDto;
+import ru.practicum.explore.with.me.model.comment.CreateUpdateCommentDto;
+
+import java.util.List;
 
 public interface CommentService {
 
@@ -22,10 +21,10 @@ public interface CommentService {
     // private
 
     // Создать комментарий к событию от пользователя
-    CommentDto createComment(Long userId, Long eventId, NewCommentDto dto);
+    CommentDto createComment(Long userId, Long eventId, CreateUpdateCommentDto dto);
 
     // Обновить текст комментария автором
-    CommentUpdateDto updateComment(Long userId, Long commentId, NewCommentDto dto);
+    CommentUpdateDto updateComment(Long userId, Long commentId, CreateUpdateCommentDto dto);
 
     // Удалить комментарий автором
     void deleteCommentByAuthor(Long userId, Long commentId);

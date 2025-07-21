@@ -9,11 +9,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.explore.with.me.model.comment.CommentDto;
 import ru.practicum.explore.with.me.model.comment.CommentUpdateDto;
 import ru.practicum.explore.with.me.model.comment.CommentUserDto;
-import ru.practicum.explore.with.me.model.comment.NewCommentDto;
+import ru.practicum.explore.with.me.model.comment.CreateUpdateCommentDto;
 import ru.practicum.explore.with.me.service.comment.CommentService;
 
 import java.util.List;
@@ -30,7 +39,7 @@ public class CommentPrivateController {
     @ResponseStatus(HttpStatus.CREATED)
     public CommentDto createComment(@PathVariable @NotNull @PositiveOrZero Long userId,
                                     @RequestParam @NotNull @PositiveOrZero Long eventId,
-                                    @RequestBody @Valid NewCommentDto commentDto) {
+                                    @RequestBody @Valid CreateUpdateCommentDto commentDto) {
         log.info("Create comment {} for event {} by user {}", commentDto, eventId, userId);
         return commentService.createComment(userId, eventId, commentDto);
     }
@@ -39,7 +48,7 @@ public class CommentPrivateController {
     @ResponseStatus(HttpStatus.OK)
     public CommentUpdateDto updateComment(@PathVariable @NotNull @PositiveOrZero Long userId,
                                           @PathVariable @NotNull @PositiveOrZero Long commentId,
-                                          @RequestBody @Valid NewCommentDto commentDto) {
+                                          @RequestBody @Valid CreateUpdateCommentDto commentDto) {
         log.info("Update comment {} for event {} by user {}", commentDto, commentId, userId);
         return commentService.updateComment(userId, commentId, commentDto);
     }
