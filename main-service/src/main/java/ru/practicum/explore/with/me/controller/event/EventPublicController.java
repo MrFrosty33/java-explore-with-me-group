@@ -2,9 +2,11 @@ package ru.practicum.explore.with.me.controller.event;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -14,10 +16,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.explore.with.me.model.comment.CommentDto;
 import ru.practicum.explore.with.me.model.event.EventPublicSort;
 import ru.practicum.explore.with.me.model.event.PublicEventParam;
 import ru.practicum.explore.with.me.model.event.dto.EventFullDto;
 import ru.practicum.explore.with.me.model.event.dto.EventShortDto;
+import ru.practicum.explore.with.me.service.comment.CommentService;
 import ru.practicum.explore.with.me.service.event.EventService;
 import ru.practicum.explore.with.me.util.StatSaver;
 
@@ -32,8 +36,9 @@ import java.util.Objects;
 @Validated
 public class EventPublicController {
     private final EventService eventsService;
+    private final CommentService commentService;
     private final StatSaver statSaver;
-    private final String controllerName = this.getClass().getSimpleName();
+    private final String className = this.getClass().getSimpleName();
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
@@ -47,7 +52,7 @@ public class EventPublicController {
                                          @RequestParam(defaultValue = "0") int from,
                                          @RequestParam(defaultValue = "10") int size,
                                          HttpServletRequest request) {
-        statSaver.save(request, controllerName);
+        statSaver.save(request, className);
 
         PublicEventParam publicEventParam = new PublicEventParam();
         publicEventParam.setText(Objects.requireNonNullElse(text, ""));
@@ -59,7 +64,7 @@ public class EventPublicController {
         publicEventParam.setSort(sort);
         publicEventParam.setFrom(from);
         publicEventParam.setSize(size);
-        log.info("Get all public events with params: {}", publicEventParam);
+        log.trace("{}: getEvents() call with publicEventParam: {}", className, publicEventParam);
 
         return eventsService.getPublicEvents(publicEventParam);
     }
@@ -68,8 +73,18 @@ public class EventPublicController {
     @ResponseStatus(HttpStatus.OK)
     public EventFullDto getEventById(@PathVariable @PositiveOrZero @NotNull Long eventId,
                                      HttpServletRequest request) {
-        statSaver.save(request, controllerName);
-        log.info("Get public event {}", eventId);
+        statSaver.save(request, className);
+        log.trace("{}: getEventById() call with eventId: {}", className, eventId);
         return eventsService.getPublicEventById(eventId);
+    }
+
+    @GetMapping("/{eventId}/comments")
+    @ResponseStatus(HttpStatus.OK)
+    public List<CommentDto> getCommentsByEvent(@PathVariable @PositiveOrZero @NotNull Long eventId,
+                                               @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                               @RequestParam(defaultValue = "10") @Positive int size) {
+        log.trace("{}: getCommentsByEvent() call with eventId: {}, from: {}, size: {}",
+                className, eventId, from, size);
+        return commentService.getCommentsByEvent(eventId, PageRequest.of(from / size, size));
     }
 }

@@ -50,7 +50,7 @@ public class ParticipationRequestPrivateController {
                                           @NotNull(message = "must not be null")
                                           @PositiveOrZero(message = "must be positive or zero")
                                           Long eventId) {
-        log.info("{}: create() call with userId: {}, eventId: {}", controllerName, userId, eventId);
+        log.trace("{}: create() call with userId: {}, eventId: {}", controllerName, userId, eventId);
 
         NewParticipationRequest newParticipationRequest = NewParticipationRequest.builder()
                 .userId(userId)
@@ -68,7 +68,7 @@ public class ParticipationRequestPrivateController {
                                           @NotNull(message = "must not be null")
                                           @PositiveOrZero(message = "must be positive or zero")
                                           Long requestId) {
-        log.info("{}: cancel() call with userId: {}, requestId: {}", controllerName, userId, requestId);
+        log.trace("{}: cancel() call with userId: {}, requestId: {}", controllerName, userId, requestId);
 
         CancelParticipationRequest cancelParticipationRequest = CancelParticipationRequest.builder()
                 .userId(userId)

@@ -30,12 +30,13 @@ import java.util.List;
 @Slf4j
 public class EventAdminController {
 
+    private final String className = this.getClass().getSimpleName();
     private final EventAdminService service;
 
     // GET /admin/events
     @GetMapping
     public List<EventFullDto> searchEvents(@ModelAttribute AdminEventSearchRequestDto req) {
-        log.info("EventAdmin: Search events with params: {}", req);
+        log.trace("{}: searchEvents() call with dto: {}", className, req);
         Pageable page = PageRequest.of(req.getFrom() / req.getSize(), req.getSize());
         AdminEventFilter f = new AdminEventFilter(
                 req.getUsers(), req.getStates(), req.getCategories(),
@@ -47,7 +48,7 @@ public class EventAdminController {
     @PatchMapping("/{eventId}")
     public EventFullDto updateEvent(@PathVariable @PositiveOrZero @NotNull Long eventId,
                                     @RequestBody @Valid UpdateEventAdminRequestDto dto) {
-        log.info("EventAdmin: Update event {} with params: {}", eventId, dto);
+        log.trace("{}: updateEvent() call with eventId: {}, dto: {}", className, eventId, dto);
         return service.update(eventId, dto);
     }
 }

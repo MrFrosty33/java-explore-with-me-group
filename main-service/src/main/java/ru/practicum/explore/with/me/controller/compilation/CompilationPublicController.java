@@ -19,6 +19,7 @@ import java.util.List;
 @RequestMapping(path = "/compilations")
 @Slf4j
 public class CompilationPublicController {
+    private final String className = this.getClass().getSimpleName();
     private final CompilationService compilationService;
 
     @GetMapping
@@ -26,7 +27,7 @@ public class CompilationPublicController {
             @RequestParam(defaultValue = "false") Boolean pinned,
             @RequestParam(defaultValue = "0") int from,
             @RequestParam(defaultValue = "10") int size) {
-        log.info("Get compilations pinned: {}, from: {}, size: {}", pinned, from, size);
+        log.trace("{}: get() call with pinned: {}, from: {}, size: {}", className, pinned, from, size);
         List<CompilationRequestDto> compilations = compilationService.get(pinned, from, size);
 
         return ResponseEntity
@@ -37,7 +38,7 @@ public class CompilationPublicController {
 
     @GetMapping("/{compId}")
     public ResponseEntity<CompilationRequestDto> getById(@PathVariable Long compId) {
-        log.info("Get compilation by id {}", compId);
+        log.trace("{}: getById() call with compilationId {}", className, compId);
         CompilationRequestDto compilationRequestDto = compilationService.getById(compId);
 
         return ResponseEntity

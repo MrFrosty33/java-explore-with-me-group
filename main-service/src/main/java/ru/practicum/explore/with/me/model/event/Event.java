@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.practicum.explore.with.me.model.category.Category;
+import ru.practicum.explore.with.me.model.comment.Comment;
 import ru.practicum.explore.with.me.model.participation.ParticipationRequest;
 import ru.practicum.explore.with.me.model.user.User;
 
@@ -44,6 +45,9 @@ public class Event {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id")
     private Category category;
+
+    @OneToMany(mappedBy = "event", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Comment> comments;
 
     @Column(name = "description", length = 7000)
     private String description;

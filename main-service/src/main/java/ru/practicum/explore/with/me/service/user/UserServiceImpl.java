@@ -24,6 +24,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class UserServiceImpl implements UserService, ExistenceValidator<User>, DataProvider<UserShortDto, User> {
+    private final String className = this.getClass().getSimpleName();
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
@@ -42,7 +43,7 @@ public class UserServiceImpl implements UserService, ExistenceValidator<User>, D
                     .toList();
         }
 
-        log.info("UserServiceImpl: result of find(): {}", result);
+        log.info("{}: result of find(): {}", className, result);
         return result;
     }
 
@@ -51,7 +52,7 @@ public class UserServiceImpl implements UserService, ExistenceValidator<User>, D
     public UserDto create(NewUserRequest newUserRequest) {
         validateEmailUnique(newUserRequest.getEmail());
         UserDto result = mapUserDto(userRepository.save(mapEntity(newUserRequest)));
-        log.info("UserServiceImpl: result of create():: {}", result);
+        log.info("{}: result of create():: {}", className, result);
         return result;
     }
 
@@ -59,7 +60,7 @@ public class UserServiceImpl implements UserService, ExistenceValidator<User>, D
     @Override
     public void delete(Long userId) {
         userRepository.deleteById(userId);
-        log.info("UserServiceImpl: user with id: {} has been deleted ", userId);
+        log.info("{}: user with id: {} has been deleted ", className, userId);
     }
 
     private User mapEntity(NewUserRequest newUserRequest) {
@@ -78,7 +79,7 @@ public class UserServiceImpl implements UserService, ExistenceValidator<User>, D
     @Override
     public void validateExists(Long id) {
         if (userRepository.findById(id).isEmpty()) {
-            log.info("attempt to find user with id: {}", id);
+            log.info("{}: attempt to find user with id: {}", className, id);
             throw new NotFoundException("The required object was not found.",
                     "User with id=" + id + " was not found");
         }
@@ -86,7 +87,7 @@ public class UserServiceImpl implements UserService, ExistenceValidator<User>, D
 
     private void validateEmailUnique(String email) {
         if (userRepository.isExistsEmail(email)) {
-            log.info("User with email {} already exists", email);
+            log.info("{}: user with email {} already exists", className, email);
             throw new ConflictException("The email of user should be unique.",
                     "User with email=" + email + " is already exist");
         }

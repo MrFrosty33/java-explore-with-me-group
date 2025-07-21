@@ -1,6 +1,7 @@
 package ru.practicum.explore.with.me.service.compilation;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,7 @@ import ru.practicum.explore.with.me.model.compilation.CompilationUpdateDto;
 import ru.practicum.explore.with.me.model.event.Event;
 import ru.practicum.explore.with.me.repository.CompilationRepository;
 import ru.practicum.explore.with.me.repository.EventRepository;
+import ru.practicum.explore.with.me.util.ExistenceValidator;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,8 +25,10 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class CompilationServiceImpl implements CompilationService {
+@Slf4j
+public class CompilationServiceImpl implements CompilationService, ExistenceValidator<Compilation> {
 
+    private final String className = this.getClass().getSimpleName();
     private final CompilationRepository compilationRepository;
     private final CompilationMapper compilationMapper;
     private final EventRepository eventRepository;
@@ -50,14 +54,15 @@ public class CompilationServiceImpl implements CompilationService {
 
         Compilation compilation = compilationMapper.toEntity(compilationCreateDto, events);
 
-        return compilationMapper.toRequestDto(compilationRepository.save(compilation));
+        CompilationRequestDto result = compilationMapper.toRequestDto(compilationRepository.save(compilation));
+        log.info("{}: result of create(): {}", className, result);
+        return result;
     }
 
     @Override
     @Transactional
     public CompilationRequestDto update(CompilationUpdateDto compilationUpdateDto, Long compId) {
-        Compilation compilation = compilationRepository.findById(compId)
-                .orElseThrow(() -> new NotFoundException("The required object was not found.", "Compilation with id=" + compId + " was not found"));
+        Compilation compilation = findByIdOrElseThrow(compId);
 
         if (compilationUpdateDto.getTitle() != null) {
             compilation.setTitle(compilationUpdateDto.getTitle());
@@ -73,18 +78,19 @@ public class CompilationServiceImpl implements CompilationService {
             compilation.setEvents(events);
         }
 
-        return compilationMapper.toRequestDto(
+        CompilationRequestDto result = compilationMapper.toRequestDto(
                 compilationRepository.save(compilation)
         );
+        log.info("{}: result of update(): {}", className, result);
+        return result;
     }
 
     @Override
     @Transactional
     public void delete(Long compId) {
-        compilationRepository.findById(compId)
-                .orElseThrow(() -> new NotFoundException("The required object was not found.", "Compilation with id=" + compId + " was not found"));
-
+        validateExists(compId);
         compilationRepository.deleteById(compId);
+        log.info("{}: compilation with id: {} was deleted", className, compId);
     }
 
     @Override
@@ -99,9 +105,11 @@ public class CompilationServiceImpl implements CompilationService {
             page = compilationRepository.findAllByPinned(pinned, pageable);
         }
 
-        return page.stream()
+        List<CompilationRequestDto> result = page.stream()
                 .map(compilationMapper::toRequestDto)
                 .collect(Collectors.toList());
+        log.info("{}: result of get(): {}", className, result);
+        return result;
     }
 
     @Override
@@ -109,6 +117,26 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation compilation = compilationRepository.findById(compId)
                 .orElseThrow(() -> new NotFoundException("The required object was not found.", "Compilation with id=" + compId + " was not found"));
 
-        return compilationMapper.toRequestDto(compilation);
+        CompilationRequestDto result = compilationMapper.toRequestDto(compilation);
+        log.info("{}: result of getById(): {}", className, result);
+        return result;
+    }
+
+    private Compilation findByIdOrElseThrow(long compilationId) {
+        return compilationRepository.findById(compilationId)
+                .orElseThrow(() -> {
+                    log.info("{}: attempt to find compilation with id:{}", className, compilationId);
+                    return new NotFoundException("The required object was not found.",
+                            "Compilation with id=" + compilationId + " was not found");
+                });
+    }
+
+    @Override
+    public void validateExists(Long id) {
+        if (compilationRepository.findById(id).isEmpty()) {
+            log.info("{}: attempt to find user with id: {}", className, id);
+            throw new NotFoundException("The required object was not found.",
+                    "Compilation with id=" + id + " was not found");
+        }
     }
 }

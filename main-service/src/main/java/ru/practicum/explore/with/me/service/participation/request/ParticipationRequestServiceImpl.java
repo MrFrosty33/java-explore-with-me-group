@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ParticipationRequestServiceImpl implements ParticipationRequestService,
         ExistenceValidator<ParticipationRequest>, DataProvider<ParticipationRequestDto, ParticipationRequest> {
 
+    private final String className = this.getClass().getSimpleName();
     private final ParticipationRequestRepository participationRequestRepository;
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
@@ -46,7 +47,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         List<ParticipationRequestDto> result = participationRequestRepository.findAllByRequesterId(userId).stream()
                 .map(this::getDto)
                 .toList();
-        log.info("ParticipationRequestServiceImpl: result of find(): {}", result);
+        log.info("{}: result of find(): {}", className, result);
         return result;
     }
 
@@ -58,8 +59,8 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
         if (participationRequestRepository.existsByRequesterIdAndEventId(
                 requesterId, eventId)) {
-            log.info("attempt to create already existent participationRequest with requesterId: {}, eventId: {}",
-                    requesterId, eventId);
+            log.info("{}: attempt to create already existent participationRequest with requesterId: {}, eventId: {}",
+                    className, requesterId, eventId);
             throw new ConflictException("Duplicate request.", "participationRequest with requesterId: " + requesterId +
                     ", and eventId: " + eventId + " already exists");
         }
@@ -70,15 +71,15 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         Event event = eventRepository.findById(eventId).get();
 
         if (event.getInitiator().getId().equals(requesterId)) {
-            log.info("attempt to create participationRequest by an event initiator with requesterId: {}, eventId: {}, " +
-                    "initiatorId: {}", requesterId, eventId, event.getInitiator().getId());
+            log.info("{}: attempt to create participationRequest by an event initiator with requesterId: {}, eventId: {}, " +
+                    "initiatorId: {}", className, requesterId, eventId, event.getInitiator().getId());
             throw new ConflictException("Initiator can't create participation request.", "requesterId: "
                     + requesterId + " equals to initiatorId: " + event.getInitiator().getId());
         }
 
         if (event.getPublishedOn() == null) {
-            log.info("attempt to create participationRequest for not published event with " +
-                    "requesterId: {}, eventId: {}", requesterId, eventId);
+            log.info("{}: attempt to create participationRequest for not published event with " +
+                    "requesterId: {}, eventId: {}", className, requesterId, eventId);
             throw new ConflictException("Can't create participation request for unpublished event.",
                     "event with id: " + eventId + " is not published yet");
         }
@@ -88,8 +89,8 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
                     .findAllByEventIdAndStatus(eventId, ParticipationRequestStatus.CONFIRMED);
             AtomicInteger remainingSpots = new AtomicInteger(event.getParticipantLimit() - alreadyConfirmed.size());
             if (remainingSpots.get() <= 0) {
-                log.info("attempt to create participationRequest, but participantLimit: {} is reached",
-                        event.getParticipantLimit());
+                log.info("{}: attempt to create participationRequest, but participantLimit: {} is reached",
+                        className, event.getParticipantLimit());
                 throw new ConflictException("Participant limit is reached.", "event with id: " + eventId +
                         " has participant limit of: " + event.getParticipantLimit());
             }
@@ -101,7 +102,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         }
 
         ParticipationRequestDto result = getDto(participationRequestRepository.save(request));
-        log.info("ParticipationRequestServiceImpl: result of create():: {}", result);
+        log.info("{}: result of create():: {}", className, result);
         return result;
     }
 
@@ -110,13 +111,16 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     public ParticipationRequestDto cancel(CancelParticipationRequest cancelParticipationRequest) {
         ParticipationRequest request = participationRequestRepository
                 .findById(cancelParticipationRequest.getRequestId())
-                .orElseThrow(() ->
-                        new NotFoundException("The required object was not found.",
-                                "ParticipationRequest with id=" + cancelParticipationRequest.getRequestId() +
-                                        " was not found"));
+                .orElseThrow(() -> {
+                    log.info("{}: attempt to find participationRequest with id: {}",
+                            cancelParticipationRequest, cancelParticipationRequest.getRequestId());
+                    return new NotFoundException("The required object was not found.",
+                            "ParticipationRequest with id=" + cancelParticipationRequest.getRequestId() +
+                                    " was not found");
+                });
         userExistenceValidator.validateExists(cancelParticipationRequest.getUserId());
         if (!request.getRequester().getId().equals(cancelParticipationRequest.getUserId())) {
-            log.info("ParticipationRequestServiceImpl: attempt to cancel participationRequest by not an owner");
+            log.info("{}: attempt to cancel participationRequest by not an owner", className);
             throw new ConflictException("Request can be cancelled only by an owner",
                     "User with id=" + cancelParticipationRequest.getUserId() +
                             " is not an owner of request with id=" + cancelParticipationRequest.getRequestId());
@@ -127,7 +131,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         result.setStatus(ParticipationRequestStatus.CANCELED);
         participationRequestRepository.deleteById(cancelParticipationRequest.getRequestId());
 
-        log.info("ParticipationRequestServiceImpl: result of cancel(): {}, which has been deleted", result);
+        log.info("{}: result of cancel(): {}, which has been deleted", className, result);
         return result;
     }
 
@@ -137,16 +141,20 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
         ParticipationRequest entity = ParticipationRequest.builder()
                 .created(LocalDateTime.now())
-                .requester(userRepository.findById(userId).orElseThrow(() ->
-                        new NotFoundException("The required object was not found.",
-                                "User with id=" + userId + " was not found")))
-                .event(eventRepository.findById(eventId).orElseThrow(() ->
-                        new NotFoundException("The required object was not found.",
-                                "Event with id=" + eventId + " was not found")))
+                .requester(userRepository.findById(userId).orElseThrow(() -> {
+                    log.info("{}: attempt to find user with id:{}", className, userId);
+                    return new NotFoundException("The required object was not found.",
+                            "User with id=" + userId + " was not found");
+                }))
+                .event(eventRepository.findById(eventId).orElseThrow(() -> {
+                    log.info("{}: attempt to find event with id:{}", className, userId);
+                    return new NotFoundException("The required object was not found.",
+                            "Event with id=" + eventId + " was not found");
+                }))
                 .status(ParticipationRequestStatus.PENDING)
                 .build();
 
-        log.trace("ParticipationRequestServiceImpl: result of mapEntity(): {}", entity);
+        log.trace("{}: result of mapEntity(): {}", className, entity);
         return entity;
     }
 
@@ -158,9 +166,20 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     @Override
     public void validateExists(Long id) {
         if (participationRequestRepository.findById(id).isEmpty()) {
-            log.info("attempt to find participationRequest with id: {}", id);
+            log.info("{}: attempt to find participationRequest with id: {}", className, id);
             throw new NotFoundException("The required object was not found.",
                     "ParticipationRequest with id=" + id + " was not found");
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isParticipantApproved(Long userId, Long eventId) {
+        return participationRequestRepository
+                .existsByRequesterIdAndEventIdAndStatus(
+                        userId,
+                        eventId,
+                        ParticipationRequestStatus.CONFIRMED
+                );
     }
 }

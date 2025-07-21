@@ -5,11 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.explore.with.me.model.category.CategoryDto;
+import ru.practicum.explore.with.me.model.comment.CommentDto;
 import ru.practicum.explore.with.me.model.event.EventState;
 import ru.practicum.explore.with.me.model.event.Location;
 import ru.practicum.explore.with.me.model.user.UserShortDto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -17,6 +19,7 @@ import java.time.LocalDateTime;
 public class EventFullDto {
     private String annotation;
     private CategoryDto category;
+    private List<CommentDto> comments;
     private int confirmedRequests;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
