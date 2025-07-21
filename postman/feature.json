@@ -501,7 +501,7 @@
                   "    pm.expect(jsonData.authorDto).to.have.property('name');",
                   "    pm.expect(jsonData).to.have.property('eventDto');",
                   "    pm.expect(jsonData.eventDto).to.have.property('id');",
-                  "    pm.expect(jsonData.eventDto).to.have.property('name');",
+                  "    pm.expect(jsonData.eventDto).to.have.property('title');",
                   "    pm.expect(jsonData).to.have.property('createdOn');",
                   "});"
                 ],
@@ -693,7 +693,7 @@
                   "    pm.expect(jsonData.authorDto).to.have.property('name');",
                   "    pm.expect(jsonData).to.have.property('eventDto');",
                   "    pm.expect(jsonData.eventDto).to.have.property('id');",
-                  "    pm.expect(jsonData.eventDto).to.have.property('name');",
+                  "    pm.expect(jsonData.eventDto).to.have.property('title');",
                   "    pm.expect(jsonData).to.have.property('createdOn');",
                   "});"
                 ],
