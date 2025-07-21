@@ -22,18 +22,19 @@ import java.util.List;
 @Validated
 @Slf4j
 public class CategoryPublicController {
+    private final String className = this.getClass().getSimpleName();
     private final CategoryServiceImpl categoryService;
 
     @GetMapping
     public List<CategoryDto> getCategories(@RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                            @RequestParam(defaultValue = "10") @Positive int size) {
-        log.info("Get categories from {} with size {}", from, size);
+        log.trace("{}: getCategories() call with from: {}, size: {}", className, from, size);
         return categoryService.getCategories(from, size);
     }
 
     @GetMapping("/{id}")
     public CategoryDto getCategoryById(@PathVariable("id") @PositiveOrZero @NotNull Long id) {
-        log.info("Get category by id {}", id);
+        log.trace("{}: getCategoryById() with id: {}", className, id);
         return categoryService.getCategory(id);
     }
 }
